@@ -10,26 +10,46 @@ use std::sync::Arc;
 const SUPPORTED_FORMATTING_REGIONS: &[&str] = &[
     "system", "CA", "US", "GB", "FR", "DE", "ES", "MX", "BR", "PT", "CN", "JP", "KR", "IT",
 ];
-const SUPPORTED_UI_LANGUAGES: &[&str] = &["en", "fr", "de", "es", "pt", "zh", "ja", "ko", "it"];
+const SUPPORTED_UI_LANGUAGES: &[&str] = &[
+    "en", "fr", "de", "es", "pt", "zh", "zh-TW", "ja", "ko", "it",
+];
+
+fn resolve_ui_language(language: &str) -> Option<&'static str> {
+    let normalized = language.trim().replace('_', "-");
+    let normalized_lower = normalized.to_ascii_lowercase();
+
+    match normalized_lower.as_str() {
+        "zh" | "zh-cn" | "zh-hans" | "zh-hans-cn" | "zh-sg" | "zh-hans-sg" => return Some("zh"),
+        "zh-tw" | "zh-hant-tw" => return Some("zh-TW"),
+        value if value.starts_with("zh-") => return None,
+        _ => {}
+    }
+
+    let mut parts = normalized.split('-');
+    let base = parts.next()?.to_ascii_lowercase();
+    if let Some(region) = parts.next() {
+        if parts.next().is_some()
+            || region.len() != 2
+            || !region.bytes().all(|byte| byte.is_ascii_alphabetic())
+        {
+            return None;
+        }
+    }
+
+    SUPPORTED_UI_LANGUAGES
+        .iter()
+        .copied()
+        .find(|supported| !supported.contains('-') && supported.eq_ignore_ascii_case(&base))
+}
 
 fn normalize_ui_language(language: &str) -> String {
-    let base = language.split(['-', '_']).next().unwrap_or(language);
-    if SUPPORTED_UI_LANGUAGES.contains(&base) {
-        base.to_string()
-    } else {
-        "en".to_string()
-    }
+    resolve_ui_language(language).unwrap_or("en").to_string()
 }
 
 fn validate_ui_language(language: &str) -> Result<String> {
-    let base = language.split(['-', '_']).next().unwrap_or(language);
-    if SUPPORTED_UI_LANGUAGES.contains(&base) {
-        Ok(base.to_string())
-    } else {
-        Err(Error::InvalidConfigValue(format!(
-            "Unsupported UI language: {language}"
-        )))
-    }
+    resolve_ui_language(language)
+        .map(str::to_string)
+        .ok_or_else(|| Error::InvalidConfigValue(format!("Unsupported UI language: {language}")))
 }
 
 fn normalize_formatting_region(_language: &str, formatting_region: &str) -> String {
@@ -225,19 +245,49 @@ mod tests {
     fn normalizes_legacy_full_locale_to_supported_ui_language() {
         assert_eq!(normalize_ui_language("en-US"), "en");
         assert_eq!(normalize_ui_language("fr_CA"), "fr");
+        assert_eq!(normalize_ui_language("zh-CN"), "zh");
+        assert_eq!(normalize_ui_language("zh-Hans"), "zh");
+        assert_eq!(normalize_ui_language("zh_Hans_CN"), "zh");
+        assert_eq!(normalize_ui_language("zh-Hans-SG"), "zh");
+        assert_eq!(normalize_ui_language("zh-TW"), "zh-TW");
+        assert_eq!(normalize_ui_language("zh_TW"), "zh-TW");
+        assert_eq!(normalize_ui_language("zh-Hant-TW"), "zh-TW");
+        assert_eq!(normalize_ui_language("zh_Hant_TW"), "zh-TW");
+        assert_eq!(normalize_ui_language(" zh-hAnT-tW "), "zh-TW");
         assert_eq!(normalize_ui_language("ja-JP"), "ja");
         assert_eq!(normalize_ui_language("ko_KR"), "ko");
     }
 
     #[test]
     fn falls_back_when_a_persisted_ui_language_is_invalid() {
-        assert_eq!(normalize_ui_language("foo_bar"), "en");
+        for language in [
+            "foo_bar",
+            "fr-CA-extra",
+            "zh-Hant",
+            "zh-HK",
+            "zh-Hans-TW",
+            "zh-TW-CN",
+            "zh-foo-TW",
+        ] {
+            assert_eq!(normalize_ui_language(language), "en");
+        }
     }
 
     #[test]
     fn rejects_unknown_ui_language_updates() {
         assert_eq!(validate_ui_language("ja-JP").unwrap(), "ja");
-        assert!(validate_ui_language("foo_bar").is_err());
+        assert_eq!(validate_ui_language("zh-TW").unwrap(), "zh-TW");
+        assert_eq!(validate_ui_language("zh-Hant-TW").unwrap(), "zh-TW");
+        for language in [
+            "zh-Hant",
+            "zh-HK",
+            "zh-Hans-TW",
+            "zh-TW-CN",
+            "zh-foo-TW",
+            "foo_bar",
+        ] {
+            assert!(validate_ui_language(language).is_err());
+        }
     }
 
     #[test]

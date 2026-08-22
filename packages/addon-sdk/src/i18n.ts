@@ -17,9 +17,13 @@ export interface AddonTranslationBundle {
 }
 
 /**
- * Translations keyed by base language code (`en`, `fr`, `de`, ...).
- * Regional codes (`fr-CA`) are normalized to their base language; keys that
- * are not plain language codes are ignored with a warning.
+ * Translations keyed by a host-supported locale code (`en`, `fr`, `zh-TW`,
+ * ...). Supported regional locales are preserved; other regional codes (for
+ * example `fr-CA`) are normalized to their base language. Taiwan Traditional
+ * Chinese uses an explicit allowlist: `zh-TW`, `zh_TW`, `zh-Hant-TW`, and
+ * `zh_Hant_TW` normalize to `zh-TW`. Ambiguous or conflicting variants such as
+ * `zh-Hant`, `zh-HK`, `zh-Hans-TW`, and `zh-TW-CN` are ignored instead of
+ * degrading to `zh`. Invalid locale keys are ignored with a warning.
  * Languages the host does not support are stored but never resolved.
  */
 export type AddonTranslationResources = Record<string, AddonTranslationBundle>;
@@ -33,7 +37,7 @@ export interface AddonTranslationApi {
    * literally, and `$t()` nesting inside translation values is disabled.
    */
   t: (key: string, options?: Record<string, unknown>) => string;
-  /** Current UI language as a base code (`en`, `fr`, ...). Follows the host setting. */
+  /** Current UI locale (`en`, `fr`, `zh-TW`, ...). Follows the host setting. */
   language: string;
 }
 

@@ -18,7 +18,7 @@ function getCachedLanguage() {
 // Language is an explicit, stored user setting (see settings-provider). We do NOT
 // auto-detect from the browser/OS. The local cache avoids a default-language flash;
 // the settings provider remains authoritative and refreshes it once settings load.
-i18n
+export const i18nReady = i18n
   .use(
     // Lazy-load `locales/<lng>/<ns>.json` on demand so we don't bundle every
     // language into the initial payload.
@@ -31,8 +31,9 @@ i18n
     lng: getCachedLanguage(),
     fallbackLng: DEFAULT_LOCALE,
     supportedLngs: SUPPORTED_LOCALE_CODES,
-    // Map regional codes (e.g. `fr-CA`) to the base language.
-    load: "languageOnly",
+    // Preserve supported regional locales such as `zh-TW`; persisted settings
+    // already contain only supported locale codes.
+    load: "currentOnly",
     ns: [...NAMESPACES],
     defaultNS: DEFAULT_NAMESPACE,
     interpolation: {

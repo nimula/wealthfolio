@@ -55,6 +55,54 @@ describe("addon sandbox i18n", () => {
     expect(i18n.language).toBe("fr");
   });
 
+  it("preserves zh-TW and falls back to English instead of zh", async () => {
+    const { initSandboxI18n } = await loadSandboxI18n();
+
+    const i18n = initSandboxI18n("zh-TW");
+
+    expect(i18n.language).toBe("zh-TW");
+    expect(i18n.languages).toContain("en");
+    expect(i18n.languages).not.toContain("zh");
+    expect(i18n.t("ui:sheet.close")).toBe("Close");
+    expect(document.documentElement.getAttribute("lang")).toBe("zh-TW");
+  });
+
+  it("normalizes allow-listed Taiwan Traditional Chinese variants", async () => {
+    const { initSandboxI18n, setSandboxLanguage } = await loadSandboxI18n();
+
+    const i18n = initSandboxI18n(" zh_hAnT_tW ");
+
+    expect(i18n.language).toBe("zh-TW");
+    expect(document.documentElement.getAttribute("lang")).toBe("zh-TW");
+
+    for (const language of ["zh-Hant", "zh-HK", "zh-Hans-TW", "zh-TW-CN", "zh-foo-TW"]) {
+      setSandboxLanguage(language);
+      expect(i18n.language).toBe("zh-TW");
+      expect(document.documentElement.getAttribute("lang")).toBe("zh-TW");
+    }
+  });
+
+  it("normalizes allow-listed Simplified Chinese variants", async () => {
+    const { initSandboxI18n, setSandboxLanguage } = await loadSandboxI18n();
+
+    const i18n = initSandboxI18n("zh-Hans-CN");
+
+    expect(i18n.language).toBe("zh");
+
+    setSandboxLanguage("zh_Hans_SG");
+    expect(i18n.language).toBe("zh");
+    expect(document.documentElement.getAttribute("lang")).toBe("zh");
+  });
+
+  it("falls back to English when initialized with a conflicting Chinese locale", async () => {
+    const { initSandboxI18n } = await loadSandboxI18n();
+
+    const i18n = initSandboxI18n("zh-Hans-TW");
+
+    expect(i18n.language).toBe("en");
+    expect(document.documentElement.getAttribute("lang")).toBe("en");
+  });
+
   it("defaults to the default locale when the host sends no language", async () => {
     const { initSandboxI18n } = await loadSandboxI18n();
     const { DEFAULT_LOCALE } = await import("@/i18n/locales");
