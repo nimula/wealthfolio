@@ -1,17 +1,29 @@
+import { createCalendar } from "@internationalized/date";
+import { useContext, useRef } from "react";
+import { useDateField } from "react-aria";
+import { useDateFieldState } from "react-stately";
 import {
   composeRenderProps,
+  DateFieldContext,
   DateFieldProps,
   DateField as DateFieldRac,
+  DateFieldStateContext,
   DateInputProps as DateInputPropsRac,
   DateInput as DateInputRac,
   DateSegmentProps,
   DateSegment as DateSegmentRac,
   DateValue as DateValueRac,
+  GroupContext,
+  InputContext,
+  Provider,
   TimeFieldProps,
   TimeField as TimeFieldRac,
+  TimeFieldStateContext,
   TimeValue as TimeValueRac,
+  useContextProps,
 } from "react-aria-components";
 
+import { useLocalizationSettings } from "../formatting-provider";
 import { cn } from "../../lib/utils";
 
 function DateField<T extends DateValueRac>({ className, children, ...props }: DateFieldProps<T>) {
@@ -52,7 +64,52 @@ interface DateInputProps extends DateInputPropsRac {
   unstyled?: boolean;
 }
 
-function DateInput({ className, unstyled = false, ...props }: Omit<DateInputProps, "children">) {
+type DateInputComponentProps = Omit<DateInputProps, "children">;
+
+function DateInput(props: DateInputComponentProps) {
+  const dateFieldState = useContext(DateFieldStateContext);
+  const timeFieldState = useContext(TimeFieldStateContext);
+
+  return dateFieldState || timeFieldState ? <DateInputInner {...props} /> : <DateInputStandalone {...props} />;
+}
+
+function DateInputStandalone(props: DateInputComponentProps) {
+  const { locale } = useLocalizationSettings();
+  const [dateFieldProps, fieldRef] = useContextProps(
+    { slot: props.slot } as DateFieldProps<DateValueRac>,
+    undefined,
+    DateFieldContext,
+  );
+  const state = useDateFieldState({
+    ...dateFieldProps,
+    locale,
+    createCalendar,
+  });
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { fieldProps, inputProps } = useDateField({ ...dateFieldProps, inputRef }, state, fieldRef);
+
+  return (
+    <Provider
+      values={[
+        [DateFieldStateContext, state],
+        [InputContext, { ...inputProps, ref: inputRef }],
+        [
+          GroupContext,
+          {
+            ...fieldProps,
+            ref: fieldRef,
+            isInvalid: state.isInvalid,
+            isDisabled: state.isDisabled,
+          },
+        ],
+      ]}
+    >
+      <DateInputInner {...props} />
+    </Provider>
+  );
+}
+
+function DateInputInner({ className, unstyled = false, ...props }: DateInputComponentProps) {
   return (
     <DateInputRac
       className={composeRenderProps(className, (className) => cn(!unstyled && dateInputStyle, className))}

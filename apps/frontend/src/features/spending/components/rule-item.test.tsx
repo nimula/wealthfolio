@@ -1,9 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { CategorizationRule } from "../types/rule";
 import { RuleItem } from "./rule-item";
+
+const { formatDecimal } = vi.hoisted(() => ({
+  formatDecimal: vi.fn((value: number, options?: Intl.NumberFormatOptions) =>
+    new Intl.NumberFormat("en-US", options).format(value),
+  ),
+}));
 
 vi.mock("@wealthfolio/ui", () => {
   const Passthrough = ({ children }: { children?: ReactNode }) => <div>{children}</div>;
@@ -22,6 +28,7 @@ vi.mock("@wealthfolio/ui", () => {
     DropdownMenuItem: Passthrough,
     DropdownMenuTrigger: Passthrough,
     Icons: new Proxy({}, { get: () => () => <span data-testid="icon" /> }),
+    useNumberFormatting: () => ({ formatDecimal }),
   };
 });
 
@@ -47,6 +54,10 @@ const renderRule = (r: CategorizationRule) =>
   render(<RuleItem rule={r} categoryMeta={{}} onEdit={vi.fn()} onDelete={vi.fn()} />);
 
 describe("RuleItem amount condition display", () => {
+  beforeEach(() => {
+    formatDecimal.mockClear();
+  });
+
   it("renders no amount chip when the rule has no condition", () => {
     renderRule(rule());
     expect(screen.queryByText(/^Amount /)).not.toBeInTheDocument();
@@ -55,6 +66,7 @@ describe("RuleItem amount condition display", () => {
   it("spells out single-value operators in words", () => {
     renderRule(rule({ amountOp: "gt", amountValue: 1000 }));
     expect(screen.getByText("Amount greater than 1,000")).toBeInTheDocument();
+    expect(formatDecimal).toHaveBeenCalledWith(1000, { maximumFractionDigits: 20 });
   });
 
   it("spells out inclusive operators", () => {
