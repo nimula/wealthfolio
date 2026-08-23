@@ -11,9 +11,18 @@ import {
   pt,
   ptBR,
   zhCN,
+  zhTW,
   type Locale,
 } from "date-fns/locale";
 import { useLocalizationSettings } from "../components/formatting-provider";
+
+const ZH_TW_LOCALE: Locale = {
+  ...zhTW,
+  options: {
+    weekStartsOn: 0,
+    firstWeekContainsDate: 1,
+  },
+};
 
 const DATE_FNS_LOCALES: Record<string, Locale> = {
   "en-CA": enCA,
@@ -26,6 +35,7 @@ const DATE_FNS_LOCALES: Record<string, Locale> = {
   "pt-BR": ptBR,
   "pt-PT": pt,
   "zh-CN": zhCN,
+  "zh-TW": ZH_TW_LOCALE,
   "ja-JP": ja,
   "ko-KR": ko,
 };
@@ -52,6 +62,7 @@ const REGION_LOCALES: Record<string, Locale> = {
   BR: ptBR,
   PT: pt,
   CN: zhCN,
+  TW: ZH_TW_LOCALE,
   JP: ja,
   KR: ko,
 };
@@ -97,7 +108,11 @@ export function dateFnsLocaleFor(locale: string | undefined): Locale {
   if (exact) return exact;
 
   const resolved = new Intl.Locale(locale);
-  const languageLocale = LANGUAGE_LOCALES[resolved.language];
+  const languageLocale =
+    resolved.language === "zh" &&
+    (resolved.script === "Hant" || (!resolved.script && resolved.region === "TW"))
+      ? ZH_TW_LOCALE
+      : LANGUAGE_LOCALES[resolved.language];
   const regionLocale = resolved.region ? REGION_LOCALES[resolved.region] : undefined;
   const localeWithWeekInfo = resolved as Intl.Locale & {
     getWeekInfo?: () => { firstDay: number; minimalDays: number };

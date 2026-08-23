@@ -395,6 +395,46 @@ export function formatDateTimeDisplay(
   });
 }
 
+export function detectDefaultCurrency(locale: string): string | undefined {
+  const lang = locale;
+  let localeInfo: Intl.Locale | undefined;
+  try {
+    localeInfo = new Intl.Locale(lang.replaceAll("_", "-"));
+  } catch {
+    // Keep the language-prefix fallbacks below for invalid locale input.
+  }
+  if (localeInfo?.region === "TW") return "TWD";
+  if (localeInfo?.region === "CN") return "CNY";
+  if (
+    localeInfo?.language === "zh" &&
+    !localeInfo.region &&
+    (!localeInfo.script || localeInfo.script === "Hans")
+  ) {
+    return "CNY";
+  }
+  if (lang.startsWith("en-GB")) return "GBP";
+  if (lang.startsWith("en-US")) return "USD";
+  if (lang.startsWith("en-CA")) return "CAD";
+  if (lang.startsWith("fr-CA")) return "CAD";
+  if (lang.startsWith("en-AU")) return "AUD";
+  if (lang.startsWith("de")) return "EUR";
+  if (lang.startsWith("fr")) return "EUR";
+  if (lang.startsWith("es-MX")) return "MXN";
+  if (lang.startsWith("es")) return "EUR";
+  if (lang.startsWith("it")) return "EUR";
+  if (lang.startsWith("ja")) return "JPY";
+  if (lang.startsWith("ko")) return "KRW";
+  if (lang.startsWith("ru")) return "RUB";
+  if (lang.startsWith("nl")) return "EUR";
+  if (lang.startsWith("pl")) return "EUR";
+  if (lang.startsWith("pt")) return "EUR";
+  if (lang.startsWith("sv")) return "EUR";
+  if (lang.startsWith("tr")) return "EUR";
+  if (lang.startsWith("ar")) return "USD";
+  if (lang.startsWith("hi")) return "INR";
+  return undefined;
+}
+
 /**
  * Normalizes a minor currency code to its major equivalent.
  * E.g., "GBp" -> "GBP", "ZAc" -> "ZAR"

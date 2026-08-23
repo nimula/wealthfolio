@@ -50,12 +50,17 @@ function FormattingRuntime({ settings, children }: { settings: LocalizationSetti
 }
 
 function resolveInterfaceLocale(uiLocale: string, formattingLocale: string): string {
+  const ui = new Intl.Locale(uiLocale);
+  if (ui.language === "zh") {
+    return ui.maximize().script === "Hant" ? "zh-TW" : "zh-CN";
+  }
+
   const formatting = new Intl.Locale(formattingLocale);
   const options: Intl.LocaleOptions = {};
   if (formatting.region) options.region = formatting.region;
   if (formatting.calendar) options.calendar = formatting.calendar;
   if (formatting.numberingSystem) options.numberingSystem = formatting.numberingSystem;
-  return new Intl.Locale(uiLocale, options).toString();
+  return new Intl.Locale(ui.toString(), options).toString();
 }
 
 export function FormattingProvider({
