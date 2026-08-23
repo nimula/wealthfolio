@@ -17,6 +17,8 @@ describe("host i18n locale resolution", () => {
     expect(i18n.languages).toContain("zh-TW");
     expect(i18n.languages).toContain("en");
     expect(i18n.languages).not.toContain("zh");
+
+    i18n.removeResourceBundle("zh-TW", "common");
     expect(i18n.t("common:welcome")).toBe("Welcome");
   });
 });

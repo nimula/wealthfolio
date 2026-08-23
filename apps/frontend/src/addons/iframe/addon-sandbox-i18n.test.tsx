@@ -63,6 +63,8 @@ describe("addon sandbox i18n", () => {
     expect(i18n.language).toBe("zh-TW");
     expect(i18n.languages).toContain("en");
     expect(i18n.languages).not.toContain("zh");
+
+    i18n.removeResourceBundle("zh-TW", "ui");
     expect(i18n.t("ui:sheet.close")).toBe("Close");
     expect(document.documentElement.getAttribute("lang")).toBe("zh-TW");
   });

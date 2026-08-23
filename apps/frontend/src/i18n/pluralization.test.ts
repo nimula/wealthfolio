@@ -12,7 +12,9 @@ import itCommon from "./locales/it/common.json";
 import jaCommon from "./locales/ja/common.json";
 import koCommon from "./locales/ko/common.json";
 import ptCommon from "./locales/pt/common.json";
+import zhTwCommon from "./locales/zh-TW/common.json";
 import zhCommon from "./locales/zh/common.json";
+import { NAMESPACES } from "./locales";
 import i18next from "i18next";
 import { describe, expect, it } from "vitest";
 
@@ -57,6 +59,7 @@ describe("global event translations", () => {
     ["ja", jaCommon],
     ["ko", koCommon],
     ["zh", zhCommon],
+    ["zh-TW", zhTwCommon],
     ["it", itCommon],
     ["pt", ptCommon],
   ])("resolves asset-count messages for %s", async (locale, common) => {
@@ -200,3 +203,68 @@ function collectKeys(node: Record<string, unknown>, prefix: string, out: Set<str
     }
   }
 }
+
+type Catalog = Record<string, unknown>;
+
+const englishCatalogs = import.meta.glob<Catalog>("./locales/en/*.json", {
+  eager: true,
+  import: "default",
+});
+
+const zhTwCatalogs = import.meta.glob<Catalog>("./locales/zh-TW/*.json", {
+  eager: true,
+  import: "default",
+});
+
+function flattenCatalog(
+  value: unknown,
+  path: string[] = [],
+  output: Record<string, unknown> = {},
+): Record<string, unknown> {
+  if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+    for (const [key, child] of Object.entries(value)) {
+      flattenCatalog(child, [...path, key], output);
+    }
+    return output;
+  }
+
+  output[path.join(".")] = value;
+  return output;
+}
+
+function interpolationTokens(value: string): string[] {
+  return (value.match(/\{\{[^{}]+\}\}/g) ?? []).sort();
+}
+
+describe("zh-TW catalog contract", () => {
+  it("matches English files, structure, interpolation, and non-empty values", () => {
+    const expectedEnglishFiles = NAMESPACES.map(
+      (namespace) => `./locales/en/${namespace}.json`,
+    ).sort();
+    const expectedZhTwFiles = NAMESPACES.map(
+      (namespace) => `./locales/zh-TW/${namespace}.json`,
+    ).sort();
+
+    expect(Object.keys(englishCatalogs).sort()).toEqual(expectedEnglishFiles);
+    expect(Object.keys(zhTwCatalogs).sort()).toEqual(expectedZhTwFiles);
+
+    for (const namespace of NAMESPACES) {
+      const english = flattenCatalog(englishCatalogs[`./locales/en/${namespace}.json`]);
+      const zhTw = flattenCatalog(zhTwCatalogs[`./locales/zh-TW/${namespace}.json`]);
+
+      expect(Object.keys(zhTw).sort(), `${namespace} keys`).toEqual(Object.keys(english).sort());
+
+      for (const [key, value] of Object.entries(zhTw)) {
+        const location = `${namespace}:${key}`;
+        expect(typeof value, `${location} must be a string`).toBe("string");
+        if (typeof value !== "string") continue;
+
+        expect(value.trim(), `${location} must not be empty`).not.toBe("");
+        expect(
+          interpolationTokens(value),
+          `${location} must preserve interpolation tokens`,
+        ).toEqual(interpolationTokens(english[key] as string));
+      }
+    }
+  });
+});
