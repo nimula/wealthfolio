@@ -1,249 +1,249 @@
 {
   "issues": {
     "price_manual_valuation_missing": {
-      "title_one": "Missing manual valuation for {{symbol}}",
-      "title_other": "Missing manual valuations for {{count}} holdings",
-      "message": "Manual/custom holdings need a manual valuation before they can be included as valued performance positions."
+      "title_one": "{{symbol}} 缺少手動估值",
+      "title_other": "{{count}} 項持有部位缺少手動估值",
+      "message": "手動／自訂持有部位需要先提供手動估值，才能納入績效統計。"
     },
     "price_no_market_data": {
-      "title_one": "No market data for {{symbol}}",
-      "title_other": "No market data for {{count}} holdings",
-      "message": "Unable to fetch market data for some holdings. This may be due to invalid symbols or provider issues. Your portfolio value may be inaccurate."
+      "title_one": "{{symbol}} 沒有市場資料",
+      "title_other": "{{count}} 項持有部位沒有市場資料",
+      "message": "無法取得某些持有部位的市場資料。這可能是由於代號無效或資料供應商問題所致。你的投資組合價值可能不準確。"
     },
     "price_stale_outdated": {
-      "title_one": "Outdated price for {{count}} holding",
-      "title_other": "Outdated prices for {{count}} holdings",
-      "message": "Some holdings haven't had prices updated in over 3 days. Your portfolio value may be inaccurate."
+      "title_one": "{{count}} 項持有部位的價格已過期",
+      "title_other": "{{count}} 項持有部位的價格已過期",
+      "message": "部分持有部位的價格已超過 3 天未更新。你的投資組合價值可能不準確。"
     },
     "price_update_needed": {
-      "title_one": "Price update needed for {{count}} holding",
-      "title_other": "Price updates needed for {{count}} holdings",
-      "message": "Some holdings haven't had prices updated recently. Consider syncing prices."
+      "title_one": "{{count}} 項持有部位需要更新價格",
+      "title_other": "{{count}} 項持有部位需要更新價格",
+      "message": "部分持有部位的價格近期未更新。建議同步價格。"
     },
     "fx_missing": {
-      "title_one": "Missing exchange rate for {{currency}}",
-      "title_other": "Missing exchange rates for {{count}} currencies",
-      "message": "We can't convert some holdings to your base currency. This affects your total portfolio value."
+      "title_one": "缺少 {{currency}} 的匯率",
+      "title_other": "{{count}} 種幣別缺少匯率",
+      "message": "我們無法將某些持有部位換算為你的基準幣別。這會影響你的投資組合總價值。"
     },
     "fx_stale_error": {
-      "title_one": "Outdated exchange rate",
-      "title_other": "Outdated exchange rates for {{count}} currencies",
-      "message": "Some exchange rates haven't been updated in over 3 days. Currency conversions may be inaccurate."
+      "title_one": "匯率已過期",
+      "title_other": "{{count}} 種幣別的匯率已過期",
+      "message": "部分匯率已超過 3 天未更新。幣別換算可能不準確。"
     },
     "fx_stale_warning": {
-      "title_one": "Exchange rate update needed",
-      "title_other": "Exchange rate updates needed for {{count}} currencies",
-      "message": "Some exchange rates haven't been updated recently. Consider refreshing rates."
+      "title_one": "需要更新匯率",
+      "title_other": "{{count}} 種幣別的匯率需要更新",
+      "message": "部分匯率近期未更新。建議重新整理匯率。"
     },
     "classification_missing_category": {
-      "title_one": "{{count}} holding needs a category",
-      "title_other": "{{count}} holdings need categories",
-      "message": "Some holdings don't have an {{taxonomy}} assigned. This affects your allocation charts and analytics."
+      "title_one": "{{count}} 項持有部位需要類別",
+      "title_other": "{{count}} 項持有部位需要類別",
+      "message": "部分持有部位尚未分配 {{taxonomy}}。這會影響你的資產配置圖表和分析。"
     },
     "classification_legacy_migration": {
-      "title_one": "{{count}} asset has legacy classification data",
-      "title_other": "{{count}} assets have legacy classification data",
-      "message": "Some assets have sector/country data from the old format. Migrate to the new taxonomy system for better allocation tracking."
+      "title_one": "{{count}} 項資產含有舊版分類資料",
+      "title_other": "{{count}} 項資產含有舊版分類資料",
+      "message": "部分資產的產業／國家資料來自舊格式。請移轉至新的分類系統，以便更準確地追蹤資產配置。"
     },
     "data_orphan_activity_account": {
-      "title_one": "Transaction references missing account",
-      "title_other": "{{count}} transactions reference missing accounts",
-      "message": "Some transactions point to accounts that no longer exist. This may cause calculation errors."
+      "title_one": "交易引用了不存在的帳戶",
+      "title_other": "{{count}} 筆交易引用了不存在的帳戶",
+      "message": "部分交易指向已不存在的帳戶。這可能導致計算錯誤。"
     },
     "data_orphan_activity_asset": {
-      "title_one": "Transaction references missing asset",
-      "title_other": "{{count}} transactions reference missing assets",
-      "message": "Some transactions point to assets that no longer exist. This may cause calculation errors."
+      "title_one": "交易引用了不存在的資產",
+      "title_other": "{{count}} 筆交易引用了不存在的資產",
+      "message": "部分交易指向已不存在的資產。這可能導致計算錯誤。"
     },
     "data_negative_position": {
-      "title_one": "Holding has negative quantity",
-      "title_other": "{{count}} holdings have negative quantities",
-      "message": "Some holdings show negative quantities, which usually indicates missing or incorrect transactions."
+      "title_one": "持有部位數量為負",
+      "title_other": "{{count}} 項持有部位數量為負",
+      "message": "部分部位顯示數量為負，通常表示有交易遺漏或內容錯誤。"
     },
     "data_legacy_classification": {
-      "title_one": "{{count}} asset has old classification data",
-      "title_other": "{{count}} assets have old classification data",
-      "message": "Some assets have legacy sector/country data that can be migrated to the new classification system."
+      "title_one": "{{count}} 項資產含有舊版分類資料",
+      "title_other": "{{count}} 項資產含有舊版分類資料",
+      "message": "部分資產含有可移轉至新分類系統的舊版產業／國家資料。"
     },
     "data_negative_account_balance": {
-      "title_one": "Account has negative portfolio balance",
-      "title_other": "{{count}} accounts have negative portfolio balance",
-      "message": "One or more accounts show a negative total value in their history. This is usually caused by missing buy transactions. Review your activities to fix this."
+      "title_one": "帳戶的投資組合餘額為負",
+      "title_other": "{{count}} 個帳戶的投資組合餘額為負",
+      "message": "一個或多個帳戶的歷史紀錄顯示總價值為負。這通常是缺少買入交易所致。請檢查交易紀錄並修正此問題。"
     },
     "data_negative_cash_balance": {
-      "title_one": "Cash account had a negative balance",
-      "title_other": "{{count}} cash accounts had a negative balance",
-      "message": "One or more cash accounts show a negative balance in their history. This may be a normal bank overdraft or a missing deposit entry."
+      "title_one": "現金帳戶曾出現負餘額",
+      "title_other": "{{count}} 個現金帳戶曾出現負餘額",
+      "message": "一個或多個現金帳戶的歷史紀錄顯示負餘額。這可能是正常的銀行透支，也可能是缺少一筆存款紀錄。"
     },
     "data_missing_lot_disposal_for_sell": {
-      "title_one": "Sale missing cost-basis match",
-      "title_other": "{{count}} sales missing cost-basis matches",
-      "message": "A sale could not be matched to a lot, so realized gain/loss and performance attribution may be incomplete."
+      "title_one": "賣出交易缺少成本基礎配對",
+      "title_other": "{{count}} 筆賣出交易缺少成本基礎配對",
+      "message": "某筆賣出交易無法配對至對應批次，因此已實現損益與績效歸因可能不完整。"
     },
     "data_missing_generated_valuation": {
-      "title_one": "Generated valuation history is incomplete",
-      "title_other": "{{count}} generated valuation rows are missing",
-      "message": "Some holdings snapshot dates do not have generated valuation rows. Rebuild account history after fixing missing prices, manual valuations, or FX rates."
+      "title_one": "系統產生的估值歷史紀錄不完整",
+      "title_other": "缺少 {{count}} 筆系統產生的估值紀錄",
+      "message": "部分持有部位快照日期沒有系統產生的估值紀錄。請在修正缺少的價格、手動估值或匯率後重建帳戶歷史紀錄。"
     },
     "data_incomplete_valuation_value": {
-      "title_one": "Valuation coverage is incomplete",
-      "title_other": "{{count}} valuation rows have incomplete market value",
-      "message": "Some generated valuation rows have incomplete market value coverage. Performance protects correctness by marking affected returns unavailable or degraded; review missing prices or manual valuations."
+      "title_one": "估值市值資料不完整",
+      "title_other": "{{count}} 筆估值紀錄的市值不完整",
+      "message": "部分系統產生的估值紀錄缺少完整市值。為確保結果正確，受影響的報酬率會標示為不可用或可信度降低；請檢查缺少的價格或手動估值。"
     },
     "data_incomplete_valuation_basis": {
-      "title_one": "Cost basis coverage is incomplete",
-      "title_other": "{{count}} positions have incomplete cost basis",
-      "message": "Some positions have missing or partial acquisition cost basis. Market value can still be shown, but gain/loss and cost-basis returns may be unavailable until the related activities are fixed."
+      "title_one": "成本基礎資料不完整",
+      "title_other": "{{count}} 個部位的成本基礎不完整",
+      "message": "部分部位缺少完整的買入成本基礎。市值仍可顯示，但在修正相關交易紀錄前，損益與成本基礎報酬率可能無法使用。"
     },
     "data_unknown_performance_flow_source": {
-      "title_one": "Performance flow boundary is unknown",
-      "title_other": "{{count}} valuation rows have unknown transfer classification",
-      "message": "Some generated valuation rows include a transfer or flow whose portfolio boundary is unknown. Review transfer activities on the affected dates and mark each transfer external or link it to its matching account."
+      "title_one": "績效資金流邊界未知",
+      "title_other": "{{count}} 筆估值紀錄的轉帳分類未知",
+      "message": "部分系統產生的估值紀錄包含投資組合邊界未知的轉帳或資金流。請檢查受影響日期的轉帳紀錄，並將每筆轉帳標示為外部轉帳，或連結至對應帳戶。"
     },
     "account_unconfigured": {
-      "title_one": "{{count}} account needs setup",
-      "title_other": "{{count}} accounts need setup",
-      "message_one": "Choose a tracking mode to start syncing data.",
-      "message_other": "Choose tracking modes to start syncing data."
+      "title_one": "{{count}} 個帳戶需要設定",
+      "title_other": "{{count}} 個帳戶需要設定",
+      "message_one": "選取追蹤模式即可開始同步資料。",
+      "message_other": "選取追蹤模式即可開始同步資料。"
     },
     "account_timezone_missing": {
-      "title": "Timezone not configured",
-      "message": "Set your timezone in General settings to ensure dates match your locale."
+      "title": "未設定時區",
+      "message": "請在「一般」設定中設定你的時區，確保日期符合你所在的地區。"
     },
     "account_timezone_invalid": {
-      "title": "Configured timezone is invalid",
-      "message": "The configured timezone \"{{timezone}}\" is invalid. Update it in General settings."
+      "title": "設定的時區無效",
+      "message": "設定的時區「{{timezone}}」無效。請在「一般」設定中更新它。"
     },
     "account_timezone_mismatch": {
-      "title": "Browser and app timezones differ",
-      "message": "Configured timezone is \"{{configured}}\" but browser timezone is \"{{browser}}\". Dates follow the configured timezone."
+      "title": "瀏覽器時區與應用程式時區不一致",
+      "message": "設定的時區為「{{configured}}」，但瀏覽器時區為「{{browser}}」。日期以設定的時區為準。"
     },
     "quote_sync_error": {
-      "title_one": "Quotes sync failing for {{symbol}}",
-      "title_other": "Quotes sync failing for {{count}} assets",
-      "message": "These assets have repeatedly failed to sync prices. Check the symbols or data provider settings."
+      "title_one": "{{symbol}} 的報價同步失敗",
+      "title_other": "{{count}} 項資產的報價同步失敗",
+      "message": "這些資產的價格已多次同步失敗。請檢查代號或資料供應商設定。"
     },
     "quote_sync_warning": {
-      "title_one": "Sync issues for {{symbol}}",
-      "title_other": "Sync issues for {{count}} assets",
-      "message": "Some assets are having trouble syncing prices. This may resolve automatically."
+      "title_one": "{{symbol}} 有同步問題",
+      "title_other": "{{count}} 項資產有同步問題",
+      "message": "部分資產同步價格時發生問題，稍後可能會自行恢復。"
     },
     "transfer_incomplete": {
-      "title_one": "Incomplete transfer detected",
-      "title_other": "{{count}} incomplete transfers detected",
-      "message": "A transfer is unpaired or missing its matching leg, so its flow was treated as external and may distort returns. Pair it with the matching transfer, or mark it external if that is intended."
+      "title_one": "偵測到不完整的轉帳",
+      "title_other": "偵測到 {{count}} 筆不完整的轉帳",
+      "message": "某筆轉帳未配對或缺少對應的另一端，因此其資金流被視為外部資金流，可能會扭曲報酬。請將其與對應的轉帳配對，如屬預期則將其標記為外部轉帳。"
     }
   },
   "page": {
-    "heading": "Data Health",
-    "text": "Identify and resolve data quality issues"
+    "heading": "資料健康",
+    "text": "找出並解決資料品質問題"
   },
   "severity": {
-    "info": "Info",
-    "warning": "Warning",
-    "error": "Error",
-    "critical": "Critical"
+    "info": "資訊",
+    "warning": "警告",
+    "error": "錯誤",
+    "critical": "嚴重"
   },
   "category": {
-    "prices": "Prices",
-    "fxRates": "FX Rates",
-    "categories": "Categories",
-    "data": "Data",
-    "accounts": "Accounts",
-    "settings": "Settings"
+    "prices": "價格",
+    "fxRates": "匯率",
+    "categories": "類別",
+    "data": "資料",
+    "accounts": "帳戶",
+    "settings": "設定"
   },
   "actions": {
-    "fix": "Fix",
-    "clear": "Clear",
-    "sync_prices": "Sync Prices",
-    "fetch_fx": "Fetch Exchange Rates",
-    "migrate_classifications": "Migrate Classifications",
-    "migrate_legacy_classifications": "Start Migration",
-    "retry_sync": "Retry Sync",
-    "to_holdings": "View Holdings",
-    "to_activities": "View Activities",
-    "to_accounts": "View Accounts",
-    "to_taxonomies": "View Classifications",
-    "to_market_data": "View Market Data",
-    "to_general_settings": "Open General Settings",
-    "to_connect": "Configure Accounts",
-    "review_transfers": "Review transfers"
+    "fix": "修復",
+    "clear": "清除",
+    "sync_prices": "同步價格",
+    "fetch_fx": "取得匯率",
+    "migrate_classifications": "移轉分類",
+    "migrate_legacy_classifications": "開始移轉",
+    "retry_sync": "重試同步",
+    "to_holdings": "查看持有部位",
+    "to_activities": "查看交易紀錄",
+    "to_accounts": "查看帳戶",
+    "to_taxonomies": "查看分類",
+    "to_market_data": "查看市場資料",
+    "to_general_settings": "開啟一般設定",
+    "to_connect": "設定帳戶",
+    "review_transfers": "檢查轉帳"
   },
-  "updatedAt": "Updated {{time}}",
+  "updatedAt": "更新於 {{time}}",
   "healthy": {
-    "title": "Your Data Looks Great",
-    "description": "No issues found. Your portfolio data is consistent and up to date."
+    "title": "你的資料狀況良好",
+    "description": "未發現問題。你的投資組合資料一致且是最新的。"
   },
   "loadError": {
-    "title": "Failed to load health status",
-    "retry": "Retry"
+    "title": "載入資料健康狀態失敗",
+    "retry": "重試"
   },
   "sheet": {
-    "groupedPriceMessage": "Wealthfolio is using carried-forward prices for these dates. Refetch or add prices for real trading days; dismiss the issue if the dates were holidays or non-trading days.",
-    "pricesByInvestment": "Prices by investment",
-    "pricesByInvestmentHint": "Open an investment to refetch or add prices. If the dates were holidays or non-trading days, dismiss the issue.",
-    "priceHistoryNeedsReview": "Price history needs review",
-    "missingTradingDay_one": "1 missing trading day: {{dates}}",
-    "missingTradingDay_other": "{{count}} missing trading days: {{dates}}",
-    "dateRange": "{{from}} to {{to}}",
-    "priceIssueSummary": "{{diagnosticCount}} price {{dateWord}} across {{assetCount}} {{assetWord}}",
-    "priceDate_one": "date",
-    "priceDate_other": "dates",
-    "investment_one": "investment",
-    "investment_other": "investments"
+    "groupedPriceMessage": "Wealthfolio 在這些日期沿用了前一個交易日的價格。若為實際交易日，請重新取得或新增價格；若為假日或非交易日，則可忽略此問題。",
+    "pricesByInvestment": "依投資項目分類的價格",
+    "pricesByInvestmentHint": "開啟某項投資以重新取得或新增價格。如果這些日期是假日或非交易日，請忽略此問題。",
+    "priceHistoryNeedsReview": "價格歷史需要檢查",
+    "missingTradingDay_one": "缺少 1 個交易日：{{dates}}",
+    "missingTradingDay_other": "缺少 {{count}} 個交易日：{{dates}}",
+    "dateRange": "{{from}} 至 {{to}}",
+    "priceIssueSummary": "{{assetCount}} 項{{assetWord}}的 {{diagnosticCount}} 個價格{{dateWord}}",
+    "priceDate_one": "日期",
+    "priceDate_other": "日期",
+    "investment_one": "投資",
+    "investment_other": "投資"
   },
   "detail": {
     "categories": {
       "priceStaleness": {
-        "label": "Price Staleness",
-        "description": "Market prices are outdated and need to be refreshed. This can affect the accuracy of your portfolio valuation."
+        "label": "價格過期",
+        "description": "市場價格已過期，需要重新整理。這可能會影響你投資組合估值的準確性。"
       },
       "fxIntegrity": {
-        "label": "Exchange Rates",
-        "description": "Missing or outdated exchange rates for currency conversion. This may impact multi-currency portfolio calculations."
+        "label": "匯率",
+        "description": "缺少或過期的幣別換算匯率。這可能會影響多幣種投資組合的計算。"
       },
       "classification": {
-        "label": "Classification",
-        "description": "Assets are missing categories or classifications. This affects portfolio breakdowns and allocation analysis."
+        "label": "分類",
+        "description": "資產缺少類別或分類。這會影響投資組合的構成明細和資產配置分析。"
       },
       "dataConsistency": {
-        "label": "Data Consistency",
-        "description": "Inconsistencies detected in portfolio data. This may cause inaccurate reporting or calculations."
+        "label": "資料一致性",
+        "description": "在投資組合資料中偵測到不一致。這可能導致報表或計算不準確。"
       },
       "accountConfiguration": {
-        "label": "Account Setup",
-        "description": "Some accounts need configuration before data can be synced. Set tracking mode to start importing data."
+        "label": "帳戶設定",
+        "description": "部分帳戶需要先完成設定才能同步資料。請設定追蹤模式以開始匯入資料。"
       },
       "settingsConfiguration": {
-        "label": "Settings",
-        "description": "Some application settings need attention to ensure data is interpreted correctly."
+        "label": "設定",
+        "description": "部分應用程式設定需要調整，才能正確解讀資料。"
       },
       "timezoneMissing": {
-        "label": "Timezone Settings",
-        "description": "Your app timezone is not configured. Until you set it, user-facing dates may not match your locale."
+        "label": "時區設定",
+        "description": "你的應用程式時區尚未設定。完成設定前，畫面上的日期可能與你所在地區不符。"
       },
       "timezoneInvalid": {
-        "label": "Timezone Settings",
-        "description": "Your configured timezone is invalid. Update it in General settings to restore consistent date handling."
+        "label": "時區設定",
+        "description": "你設定的時區無效。請在「一般」設定中更新它，以恢復一致的日期處理。"
       },
       "timezoneMismatch": {
-        "label": "Timezone Settings",
-        "description": "Your browser timezone differs from the configured app timezone. Portfolio dates follow the configured timezone."
+        "label": "時區設定",
+        "description": "你的瀏覽器時區與設定的應用程式時區不同。投資組合日期以設定的時區為準。"
       }
     },
-    "affectedItems": "Affected Items ({{count}})",
-    "impact": "Impact",
-    "affectedItemsCount": "Affected items",
-    "portfolioImpact": "Portfolio impact",
-    "details": "Details",
-    "aboutThisIssue": "About this issue",
-    "dismiss": "Dismiss",
+    "affectedItems": "受影響的項目（{{count}}）",
+    "impact": "影響",
+    "affectedItemsCount": "受影響的項目",
+    "portfolioImpact": "對投資組合的影響",
+    "details": "詳細資訊",
+    "aboutThisIssue": "關於此問題",
+    "dismiss": "忽略",
     "dismissConfirm": {
-      "title": "Dismiss this issue?",
-      "message": "This will hide the issue from your health center. It will reappear if the underlying data changes.",
-      "pendingText": "Dismissing..."
+      "title": "忽略此問題？",
+      "message": "這會在你的健康中心隱藏該問題。如果原始資料有變更，問題會再次出現。",
+      "pendingText": "正在忽略……"
     },
-    "affectedItems_one": "Affected Item ({{count}})",
-    "affectedItems_other": "Affected Items ({{count}})"
+    "affectedItems_one": "受影響項目（{{count}}）",
+    "affectedItems_other": "受影響的項目（{{count}}）"
   }
 }
