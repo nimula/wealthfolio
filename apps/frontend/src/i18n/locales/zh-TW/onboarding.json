@@ -1,98 +1,98 @@
 {
   "buttons": {
-    "continue": "Continue",
-    "subscribeConnect": "Subscribe & Connect",
-    "getStarted": "Get Started"
+    "continue": "繼續",
+    "subscribeConnect": "訂閱並連結帳戶",
+    "getStarted": "開始使用"
   },
   "steps": {
     "chooseMode": {
-      "subtitle": "Two ways to track your portfolio.",
+      "subtitle": "兩種方式追蹤投資組合。",
       "holdings": {
-        "title": "Holdings",
-        "subtitle": "Value Tracking",
-        "badge": "Best for low-maintenance tracking.",
+        "title": "持有部位",
+        "subtitle": "市值追蹤",
+        "badge": "適合不想頻繁維護的追蹤方式。",
         "features": {
-          "netWorth": "Net worth & allocation",
-          "unrealizedPnl": "Value & unrealized P&L",
-          "priceBased": "Price-based performance",
-          "fastSetup": "Fast & lightweight setup"
+          "netWorth": "淨資產與資產配置",
+          "unrealizedPnl": "市值與未實現損益",
+          "priceBased": "依價格計算績效",
+          "fastSetup": "快速、輕量的設定"
         },
-        "limit": "Limit: No transaction-based TWR/IRR.",
-        "note": "Note: Requires maintaining holdings/positions."
+        "limit": "限制：無法依交易計算 TWR/IRR。",
+        "note": "注意：需要維護持有部位資料。"
       },
       "transactions": {
-        "title": "Transactions",
-        "subtitle": "Performance Tracking",
-        "badge": "Best for full performance analytics.",
+        "title": "交易",
+        "subtitle": "績效追蹤",
+        "badge": "適合需要完整績效分析的使用者。",
         "features": {
-          "totalReturn": "Total return over time",
-          "attribution": "Gains & cashflow attribution",
-          "completeView": "Most complete performance view",
-          "brokerSync": "Best with broker sync or CSV import"
+          "totalReturn": "各期間的總報酬",
+          "attribution": "損益與現金流歸因",
+          "completeView": "最完整的績效全貌",
+          "brokerSync": "最適合搭配券商同步或 CSV 匯入"
         },
-        "limit": "Limit: Requires tracking all transactions.",
-        "note": "Note: Automated if synced with a broker."
+        "limit": "限制：必須記錄所有交易。",
+        "note": "注意：與券商同步後可自動記錄。"
       },
-      "footnote": "You can use different modes for different accounts.",
-      "learnMore": "Learn more"
+      "footnote": "不同帳戶可以使用不同模式。",
+      "learnMore": "瞭解更多"
     },
     "preferences": {
-      "subtitle": "Just a couple preferences to get you started",
-      "currencyLabel": "Currency",
-      "timezoneLabel": "Timezone",
-      "other": "Other",
-      "selectCurrency": "Select Currency",
-      "selectTimezone": "Select Timezone",
-      "searchCurrenciesPlaceholder": "Search currencies...",
-      "searchTimezonesPlaceholder": "Search timezones...",
-      "noCurrenciesFound": "No currencies found",
-      "noTimezonesFound": "No timezones found",
-      "currencyRequired": "Please select a base currency.",
-      "timezoneRequired": "Please select a timezone.",
-      "languageLabel": "Language",
-      "formattingRegionLabel": "Region & formats",
-      "searchRegionsPlaceholder": "Search regions...",
-      "noRegionsFound": "No regions found"
+      "subtitle": "設定幾項偏好，就能開始使用",
+      "currencyLabel": "幣別",
+      "timezoneLabel": "時區",
+      "other": "其他",
+      "selectCurrency": "選取幣別",
+      "selectTimezone": "選取時區",
+      "searchCurrenciesPlaceholder": "搜尋幣別…",
+      "searchTimezonesPlaceholder": "搜尋時區…",
+      "noCurrenciesFound": "找不到幣別",
+      "noTimezonesFound": "找不到時區",
+      "currencyRequired": "請選取基準幣別。",
+      "timezoneRequired": "請選取時區。",
+      "languageLabel": "介面語言",
+      "formattingRegionLabel": "地區與格式",
+      "searchRegionsPlaceholder": "搜尋地區…",
+      "noRegionsFound": "找不到地區"
     }
   },
   "appearance": {
-    "subtitle": "Customize your experience",
-    "themeLabel": "Theme",
-    "fontLabel": "Font",
-    "themeLight": "Light",
-    "themeDark": "Dark",
-    "themeSystem": "System",
-    "themeLightPreviewAlt": "Light theme preview",
-    "themeDarkPreviewAlt": "Dark theme preview",
-    "themeSystemPreviewAlt": "System theme preview",
-    "fontSample": "Invest with clarity.",
+    "subtitle": "自訂使用體驗",
+    "themeLabel": "主題",
+    "fontLabel": "字型",
+    "themeLight": "淺色",
+    "themeDark": "深色",
+    "themeSystem": "跟隨系統",
+    "themeLightPreviewAlt": "淺色主題預覽",
+    "themeDarkPreviewAlt": "深色主題預覽",
+    "themeSystemPreviewAlt": "系統主題預覽",
+    "fontSample": "清楚掌握投資。",
     "fonts": {
-      "monoLabel": "Mono",
-      "monoDescription": "Technical & precise",
-      "sansLabel": "Sans",
-      "sansDescription": "Clean & modern",
-      "serifLabel": "Serif",
-      "serifDescription": "Classic & elegant"
+      "monoLabel": "等寬",
+      "monoDescription": "俐落精準的技術感",
+      "sansLabel": "無襯線",
+      "sansDescription": "簡潔現代",
+      "serifLabel": "襯線",
+      "serifDescription": "經典優雅"
     },
-    "navigationLabel": "Navigation"
+    "navigationLabel": "導覽"
   },
   "connect": {
-    "optional": "Optional",
+    "optional": "選用",
     "title": "Wealthfolio Connect",
-    "subtitle": "Automatically sync your brokers while keeping your data private.",
-    "learnMore": "Learn more about Connect",
+    "subtitle": "自動同步券商資料，同時保護資料隱私。",
+    "learnMore": "進一步瞭解 Connect",
     "features": {
       "brokerageSync": {
-        "title": "Brokerage Sync",
-        "description": "Auto-sync your accounts and transactions into your local database."
+        "title": "券商同步",
+        "description": "自動將帳戶與交易同步至本機資料庫。"
       },
       "deviceSync": {
-        "title": "Device Sync",
-        "description": "Keep your database in sync across all devices with end-to-end encryption."
+        "title": "裝置同步",
+        "description": "透過端對端加密，讓所有裝置的資料庫保持同步。"
       },
       "householdView": {
-        "title": "Household View",
-        "description": "Share selected accounts with family and see an aggregated view together."
+        "title": "家庭總覽",
+        "description": "與家人共享指定帳戶，一起查看彙整資訊。"
       }
     }
   }
