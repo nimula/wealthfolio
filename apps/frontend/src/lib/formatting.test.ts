@@ -98,6 +98,24 @@ describe("locale formatting", () => {
     expect(() => dateFnsLocaleFor(undefined)).toThrow("A resolved formatting locale is required");
   });
 
+  it.each([
+    ["zh-TW", "大約 2 小時"],
+    ["zh-CN", "大约 2 小时"],
+  ])("applies CLDR week rules to the exact %s date-fns locale", (locale, distance) => {
+    const weekInfo = vi
+      .spyOn(Intl.Locale.prototype, "weekInfo", "get")
+      .mockReturnValue({ firstDay: 2, weekend: [6, 7], minimalDays: 4 });
+
+    try {
+      const dateFnsLocale = dateFnsLocaleFor(locale);
+      expect(dateFnsLocale.formatDistance("aboutXHours", 2)).toBe(distance);
+      expect(dateFnsLocale.options?.weekStartsOn).toBe(2);
+      expect(dateFnsLocale.options?.firstWeekContainsDate).toBe(4);
+    } finally {
+      weekInfo.mockRestore();
+    }
+  });
+
   it.each(["it-IT", "pt-BR", "nl-NL", "ar-EG", "fa-IR"])(
     "supports the arbitrary system locale %s in date-fns calendars",
     (locale) => {

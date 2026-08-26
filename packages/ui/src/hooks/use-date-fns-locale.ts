@@ -104,15 +104,16 @@ function createIntlLocale(locale: string, options: Locale["options"]): Locale {
 
 export function dateFnsLocaleFor(locale: string | undefined): Locale {
   if (!locale) throw new Error("A resolved formatting locale is required for date-fns");
-  const exact = DATE_FNS_LOCALES[locale];
-  if (exact) return exact;
 
   const resolved = new Intl.Locale(locale);
-  const languageLocale =
-    resolved.language === "zh" &&
+  // Exact entries select calendar text only. Week conventions still come from
+  // Intl below so date-fns defaults cannot override the selected region's CLDR data.
+  const textLocale =
+    DATE_FNS_LOCALES[locale] ??
+    (resolved.language === "zh" &&
     (resolved.script === "Hant" || (!resolved.script && resolved.region === "TW"))
       ? ZH_TW_LOCALE
-      : LANGUAGE_LOCALES[resolved.language];
+      : LANGUAGE_LOCALES[resolved.language]);
   const regionLocale = resolved.region ? REGION_LOCALES[resolved.region] : undefined;
   const localeWithWeekInfo = resolved as Intl.Locale & {
     getWeekInfo?: () => { firstDay: number; minimalDays: number };
@@ -125,11 +126,11 @@ export function dateFnsLocaleFor(locale: string | undefined): Locale {
         firstWeekContainsDate: weekInfo.minimalDays === 4 ? 4 : 1,
       }
     : regionLocale?.options;
-  if (!languageLocale) return createIntlLocale(locale, options);
-  if (!options) return languageLocale;
+  if (!textLocale) return createIntlLocale(locale, options);
+  if (!options) return textLocale;
 
   // date-fns owns calendar text while the selected region owns week conventions.
-  return { ...languageLocale, code: locale, options };
+  return { ...textLocale, code: locale, options };
 }
 
 export function useDateFnsLocale(): Locale {
