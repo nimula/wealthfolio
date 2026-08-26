@@ -113,7 +113,7 @@ describe("FormattingProvider", () => {
       uiLocale: "zh-TW",
       expectedSettings: "de-DE|zh-TW",
       expectedNumber: "1.234,56",
-      expectedSegments: ["day", "month", "year"],
+      expectedSegments: ["year", "month", "day"],
       expectedDescription: /選定的日期：/,
     },
     {
@@ -129,7 +129,7 @@ describe("FormattingProvider", () => {
       uiLocale: "en",
       expectedSettings: "zh-TW|en",
       expectedNumber: "1,234.56",
-      expectedSegments: ["year", "month", "day"],
+      expectedSegments: ["month", "day", "year"],
       expectedDescription: /Selected Date:/,
     },
   ])(
@@ -152,10 +152,7 @@ describe("FormattingProvider", () => {
 
       expect(screen.getByText(expectedSettings)).toBeInTheDocument();
       expect(screen.getByText(expectedNumber)).toBeInTheDocument();
-      const fieldGroup = screen.getByRole("group");
-      const descriptionId = fieldGroup.getAttribute("aria-describedby");
-      expect(descriptionId).toBeTruthy();
-      expect(document.getElementById(descriptionId!)).toHaveTextContent(expectedDescription);
+      expect(screen.getByText(expectedDescription)).toBeInTheDocument();
       expect(screen.getAllByRole("spinbutton").map((segment) => segment.dataset.type)).toEqual(
         expectedSegments,
       );

@@ -13,15 +13,10 @@ import {
 export interface LocalizationSettings {
   locale: string;
   uiLocale: string;
-  interfaceLocale: string;
   timezone?: string;
 }
 
-const DEFAULT_LOCALIZATION_SETTINGS: LocalizationSettings = {
-  locale: "en-US",
-  uiLocale: "en",
-  interfaceLocale: "en",
-};
+const DEFAULT_LOCALIZATION_SETTINGS: LocalizationSettings = { locale: "en-US", uiLocale: "en" };
 const DEFAULT_AMOUNT_FORMATTING = createAmountFormatting(DEFAULT_LOCALIZATION_SETTINGS.locale);
 const DEFAULT_NUMBER_FORMATTING = createNumberFormatting(DEFAULT_LOCALIZATION_SETTINGS.locale);
 const DEFAULT_DATE_FORMATTING = createDateFormatting(DEFAULT_LOCALIZATION_SETTINGS.locale);
@@ -54,13 +49,18 @@ function FormattingRuntime({ settings, children }: { settings: LocalizationSetti
   );
 }
 
-function resolveInterfaceLocale(uiLocale: string): string {
+function resolveInterfaceLocale(uiLocale: string, formattingLocale: string): string {
   const ui = new Intl.Locale(uiLocale);
   if (ui.language === "zh") {
     return ui.maximize().script === "Hant" ? "zh-TW" : "zh-CN";
   }
 
-  return ui.toString();
+  const formatting = new Intl.Locale(formattingLocale);
+  const options: Intl.LocaleOptions = {};
+  if (formatting.region) options.region = formatting.region;
+  if (formatting.calendar) options.calendar = formatting.calendar;
+  if (formatting.numberingSystem) options.numberingSystem = formatting.numberingSystem;
+  return new Intl.Locale(ui.toString(), options).toString();
 }
 
 export function FormattingProvider({
@@ -75,10 +75,10 @@ export function FormattingProvider({
   children: React.ReactNode;
 }) {
   const resolvedLocale = resolveFormattingLocale(locale);
-  const interfaceLocale = resolveInterfaceLocale(uiLocale);
+  const interfaceLocale = resolveInterfaceLocale(uiLocale, resolvedLocale);
   const settings = React.useMemo(
-    () => ({ locale: resolvedLocale, uiLocale, interfaceLocale, timezone }),
-    [resolvedLocale, uiLocale, interfaceLocale, timezone],
+    () => ({ locale: resolvedLocale, uiLocale, timezone }),
+    [resolvedLocale, uiLocale, timezone],
   );
   return (
     <I18nProvider locale={interfaceLocale}>
