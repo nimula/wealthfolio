@@ -92,6 +92,7 @@
       "category": "類別",
       "value": "價值",
       "delta_period": "Δ {{period}}",
+      "new": "新增",
       "liabilities": "負債",
       "net_worth": "淨資產"
     },

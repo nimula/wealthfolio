@@ -318,6 +318,7 @@
       "current_fund_balance": "目前基金餘額",
       "monthly_fund_contribution": "每月基金提撥",
       "fund_return_before_payout": "給付前基金報酬率",
+      "fund_payout_rate": "基金給付率",
       "monthly_payout_after_tax": "稅後每月給付",
       "payout_estimate_note": "除非你輸入每月給付，否則會以預計基金餘額的 {{pct}}%/年估算給付。",
       "start_age": "起始年齡",
