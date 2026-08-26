@@ -77,6 +77,8 @@ export function ShortTextCell<TData>({
 
   const onWrapperKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.nativeEvent.isComposing) return;
+
       if (isEditing) {
         if (event.key === "Enter") {
           event.preventDefault();
@@ -280,6 +282,8 @@ export function LongTextCell<TData>({
 
   const onKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (event.nativeEvent.isComposing) return;
+
       if (event.key === "Escape") {
         event.preventDefault();
         onCancel();
@@ -627,6 +631,8 @@ export function UrlCell<TData>({
 
   const onWrapperKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.nativeEvent.isComposing) return;
+
       if (isEditing) {
         if (event.key === "Enter") {
           event.preventDefault();
@@ -1163,6 +1169,8 @@ export function MultiSelectCell<TData>({
 
   const onInputKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.nativeEvent.isComposing) return;
+
       // Handle backspace when input is empty - remove last selected item
       if (event.key === "Backspace" && searchValue === "" && selectedValues.length > 0) {
         event.preventDefault();
@@ -2667,6 +2675,8 @@ export function SymbolCell<TData>({
 
   const onInputKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.nativeEvent.isComposing) return;
+
       if (event.key === "Escape") {
         event.preventDefault();
         setValue(initialValue ?? "");
@@ -2899,6 +2909,8 @@ export function CurrencyCell<TData>({
 
   const onInputKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.nativeEvent.isComposing) return;
+
       if (event.key === "Escape") {
         event.preventDefault();
         setValue(initialValue ?? "");
