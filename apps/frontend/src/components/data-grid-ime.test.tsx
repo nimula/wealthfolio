@@ -19,10 +19,12 @@ interface PortalCellTestRow {
 type PortalCellVariant = "multi-select" | "symbol" | "currency";
 
 class ResizeObserverStub {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
 }
+
+const originalScrollIntoView = Object.getOwnPropertyDescriptor(Element.prototype, "scrollIntoView");
 
 beforeAll(() => {
   vi.stubGlobal("ResizeObserver", ResizeObserverStub);
@@ -32,7 +34,11 @@ beforeAll(() => {
   });
 });
 afterAll(() => {
-  delete (Element.prototype as Element & { scrollIntoView?: () => void }).scrollIntoView;
+  if (originalScrollIntoView) {
+    Object.defineProperty(Element.prototype, "scrollIntoView", originalScrollIntoView);
+  } else {
+    Reflect.deleteProperty(Element.prototype, "scrollIntoView");
+  }
   vi.unstubAllGlobals();
 });
 
