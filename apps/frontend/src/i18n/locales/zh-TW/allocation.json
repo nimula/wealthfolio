@@ -17,7 +17,7 @@
     "absoluteDescription": "對每個類別套用相同的固定容差帶，與其目標權重無關。",
     "relativeFactor": "相對系數",
     "percentOfTarget": "目標的 ±{{value}}%",
-    "tight": "緊",
+    "tight": "嚴格",
     "standard": "標準",
     "loose": "寬鬆",
     "absoluteFloor": "絕對下限",
