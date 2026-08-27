@@ -4,6 +4,8 @@ import esActivity from "./locales/es/activity.json";
 import frActivity from "./locales/fr/activity.json";
 import itActivity from "./locales/it/activity.json";
 import ptActivity from "./locales/pt/activity.json";
+import zhTwActivity from "./locales/zh-TW/activity.json";
+import zhTwAi from "./locales/zh-TW/ai.json";
 import deCommon from "./locales/de/common.json";
 import enCommon from "./locales/en/common.json";
 import esCommon from "./locales/es/common.json";
@@ -13,6 +15,7 @@ import jaCommon from "./locales/ja/common.json";
 import koCommon from "./locales/ko/common.json";
 import ptCommon from "./locales/pt/common.json";
 import zhTwCommon from "./locales/zh-TW/common.json";
+import zhTwSettings from "./locales/zh-TW/settings.json";
 import zhCommon from "./locales/zh/common.json";
 import { NAMESPACES } from "./locales";
 import i18next from "i18next";
@@ -203,6 +206,38 @@ function collectKeys(node: Record<string, unknown>, prefix: string, out: Set<str
     }
   }
 }
+
+describe("zh-TW plural output", () => {
+  it.each([0, 1, 2])("keeps classifiers and nouns for count %s", async (count) => {
+    const i18n = i18next.createInstance();
+    await i18n.init({
+      defaultNS: "activity",
+      fallbackLng: false,
+      interpolation: { escapeValue: false },
+      lng: "zh-TW",
+      ns: ["activity", "ai", "settings"],
+      resources: {
+        "zh-TW": {
+          activity: zhTwActivity,
+          ai: zhTwAi,
+          settings: zhTwSettings,
+        },
+      },
+    });
+
+    expect(i18n.t("activity:datagrid.approve_count", { count })).toBe(`核准 ${count} 筆`);
+    expect(i18n.t("ai:accounts.of", { count })).toBe(`共 ${count} 個`);
+    expect(i18n.t("ai:goals.of", { count })).toBe(`共 ${count} 個`);
+    expect(
+      i18n.t("ai:assetTaxonomy.loadedCategoriesTotal", {
+        count,
+        taxonomy: "產業",
+        total: 5,
+      }),
+    ).toBe(`已為 產業 載入 ${count} 個類別 · 共 5 個`);
+    expect(i18n.t("settings:addons_updates_critical", { count })).toBe(`（${count} 項重大更新）`);
+  });
+});
 
 type Catalog = Record<string, unknown>;
 

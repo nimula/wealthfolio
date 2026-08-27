@@ -730,7 +730,7 @@
     "add_transaction": "新增交易",
     "add": "新增",
     "approve_selected": "核准所選的已同步交易紀錄",
-    "approve_count": "核准 {{count}}",
+    "approve_count": "核准 {{count}} 筆",
     "unlink_internal_transfer": "取消內部轉帳配對",
     "unlink": "取消配對",
     "link_as_internal_transfer": "配對為內部轉帳",
@@ -742,7 +742,7 @@
     "warn_dates_differ_one": "日期相差 {{count}} 天。",
     "warn_dates_differ_other": "日期相差 {{count}} 天。",
     "approve_count_one": "核准 {{count}} 筆",
-    "approve_count_other": "核准 {{count}}"
+    "approve_count_other": "核准 {{count}} 筆"
   },
   "table": {
     "cash": "現金",

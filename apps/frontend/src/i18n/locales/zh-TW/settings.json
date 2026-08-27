@@ -1207,8 +1207,8 @@
       "recategorize_confirm_desc": "這會對支出帳戶中的每筆交易紀錄重新執行所有規則，可能覆寫現有的自動分類。手動分類會保留。"
     }
   },
-  "addons_updates_critical_one": "（{{count}} 項關鍵）",
-  "addons_updates_critical_other": "（{{count}} 項關鍵）",
+  "addons_updates_critical_one": "（{{count}} 項重大更新）",
+  "addons_updates_critical_other": "（{{count}} 項重大更新）",
   "fx_title": "匯率",
   "fx_description": "管理投資組合中各幣別的匯率。",
   "fx_add": "新增匯率",
