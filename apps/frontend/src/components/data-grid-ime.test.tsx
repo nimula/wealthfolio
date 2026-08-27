@@ -1,10 +1,40 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { InputTags, useDataGrid } from "@wealthfolio/ui";
-import { describe, expect, it, vi } from "vitest";
+import { InputTags, type DataGridCellProps, useDataGrid } from "@wealthfolio/ui";
+import {
+  CurrencyCell,
+  MultiSelectCell,
+  SymbolCell,
+} from "@wealthfolio/ui/components/data-grid/data-grid-cell-variants";
+import type { Cell, TableMeta } from "@tanstack/react-table";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 interface TestRow {
   name: string | null;
 }
+
+interface PortalCellTestRow {
+  value: string | string[];
+}
+
+type PortalCellVariant = "multi-select" | "symbol" | "currency";
+
+class ResizeObserverStub {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+beforeAll(() => {
+  vi.stubGlobal("ResizeObserver", ResizeObserverStub);
+  Object.defineProperty(Element.prototype, "scrollIntoView", {
+    configurable: true,
+    value: vi.fn(),
+  });
+});
+afterAll(() => {
+  delete (Element.prototype as Element & { scrollIntoView?: () => void }).scrollIntoView;
+  vi.unstubAllGlobals();
+});
 
 function GridHarness() {
   const grid = useDataGrid<TestRow>({
@@ -21,6 +51,57 @@ function GridHarness() {
       <output data-testid="editing">{grid.editingCell ? "editing" : "idle"}</output>
     </>
   );
+}
+
+async function renderPortalCell(variant: PortalCellVariant) {
+  const initialValue =
+    variant === "multi-select" ? ["alpha"] : variant === "symbol" ? "AAPL" : "USD";
+  const cellOptions =
+    variant === "multi-select"
+      ? {
+          variant,
+          options: [
+            { label: "Alpha", value: "alpha" },
+            { label: "Beta", value: "beta" },
+          ],
+        }
+      : variant === "symbol"
+        ? { variant, onSearch: vi.fn().mockResolvedValue([]) }
+        : { variant };
+  const cell = {
+    getValue: () => initialValue,
+    column: { columnDef: { meta: { cell: cellOptions } } },
+    row: { original: { value: initialValue } },
+  } as unknown as Cell<PortalCellTestRow, unknown>;
+  const onCellEditingStop = vi.fn();
+  const tableMeta: TableMeta<PortalCellTestRow> = { onCellEditingStop };
+  const props: DataGridCellProps<PortalCellTestRow> = {
+    cell,
+    tableMeta,
+    rowIndex: 0,
+    columnId: "value",
+    rowHeight: "short",
+    isEditing: true,
+    isFocused: true,
+    isSelected: false,
+    isSearchMatch: false,
+    isActiveSearchMatch: false,
+    readOnly: false,
+  };
+
+  render(
+    variant === "multi-select" ? (
+      <MultiSelectCell {...props} />
+    ) : variant === "symbol" ? (
+      <SymbolCell {...props} />
+    ) : (
+      <CurrencyCell {...props} />
+    ),
+  );
+
+  const input = await screen.findByRole("combobox");
+  onCellEditingStop.mockClear();
+  return { input, onCellEditingStop };
 }
 
 describe("CJK IME composition", () => {
@@ -49,4 +130,30 @@ describe("CJK IME composition", () => {
     fireEvent.keyDown(input, { key: "Enter" });
     expect(onChange).toHaveBeenCalledWith(["候選"]);
   });
+
+  it.each(["multi-select", "symbol", "currency"] as const)(
+    "keeps the %s portal cell open for composing Escape",
+    async (variant) => {
+      const { input, onCellEditingStop } = await renderPortalCell(variant);
+
+      fireEvent.change(input, { target: { value: "候選" } });
+      fireEvent.keyDown(input, { key: "Escape", isComposing: true });
+
+      expect(onCellEditingStop).not.toHaveBeenCalled();
+      expect(input).toHaveValue("候選");
+    },
+  );
+
+  it.each(["multi-select", "symbol", "currency"] as const)(
+    "keeps the %s portal cell's non-composing Escape behavior",
+    async (variant) => {
+      const { input, onCellEditingStop } = await renderPortalCell(variant);
+
+      fireEvent.change(input, { target: { value: "changed" } });
+      fireEvent.keyDown(input, { key: "Escape" });
+
+      expect(onCellEditingStop).toHaveBeenCalled();
+      expect(input).toHaveValue("");
+    },
+  );
 });
