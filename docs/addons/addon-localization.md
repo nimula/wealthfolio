@@ -72,6 +72,11 @@ export default function enable(ctx: AddonContext) {
       title: "Prévision de dividendes",
       greeting: "Bonjour {{name}}",
     },
+    "zh-TW": {
+      title: "股利預測",
+      greeting: "{{name}}，你好",
+      holdings_other: "{{count}} 筆持股",
+    },
   });
 
   // ... register routes / sidebar items
@@ -89,11 +94,15 @@ Behavior and rules:
   namespace; you cannot read or overwrite the host's strings, and other addons
   cannot see yours.
 - **Language follows the host.** There is no API to change the language from an
-  addon — the UI language is a user setting. `language` from the hook tells you
-  the current base code (`en`, `fr`, `de`, `es`, `zh`, `ja`, `ko`).
+  addon — the UI language is a user setting. `language` from the hook returns
+  the current supported locale code: `en`, `fr`, `de`, `es`, `zh`, `zh-TW`,
+  `ja`, or `ko`. Supported regional codes are preserved, so Traditional Chinese
+  is reported as `zh-TW`, not `zh`.
 - **Fallback is your `en` bundle.** If the current language is missing a key (or
   the whole bundle), lookup falls back to your `en` resources; if that is
   missing too, the key itself is rendered. Always ship a complete `en` bundle.
+  In particular, missing `zh-TW` content falls back directly to `en`; it never
+  uses the Simplified Chinese `zh` bundle.
 - **Interpolation and plurals** use standard i18next syntax: `{{name}}`
   placeholders, and `_one` / `_other` plural suffixes driven by
   `t('holdings', { count })`. `$t()` nesting inside translation values is
@@ -102,6 +111,44 @@ Behavior and rules:
 - Components re-render automatically on language changes and on (late)
   `registerTranslations` calls, but registering in `enable()` before the first
   render avoids a flash of untranslated keys.
+
+### Traditional Chinese (`zh-TW`)
+
+Use the exact `zh-TW` key when registering Taiwan Traditional Chinese resources:
+
+```tsx
+registerTranslations({
+  en: {
+    emptyState: "No holdings yet",
+  },
+  "zh-TW": {
+    emptyState: "尚無持股",
+  },
+});
+```
+
+The registration API also normalizes `zh_TW`, `zh-Hant-TW`, and `zh_Hant_TW` to
+`zh-TW`, but the canonical `zh-TW` form is recommended. Other Chinese resource
+keys, including `zh-Hant`, `zh-HK`, conflicting script/region combinations, and
+malformed tags, are ignored with a warning rather than being silently treated as
+`zh` or `zh-TW`.
+
+Traditional Chinese uses i18next's `_other` plural form for numeric counts.
+Provide that suffix when a key is called with `{ count }`, even when the text is
+identical for every count:
+
+```tsx
+registerTranslations({
+  "zh-TW": {
+    holdings_other: "{{count}} 筆持股",
+  },
+});
+
+function HoldingCount({ count }: { count: number }) {
+  const { t } = useAddonTranslation();
+  return <span>{t("holdings", { count })}</span>;
+}
+```
 
 ### Languages beyond the host's set
 
