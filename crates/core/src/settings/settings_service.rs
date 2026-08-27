@@ -20,7 +20,9 @@ fn resolve_ui_language(language: &str) -> Option<&'static str> {
 
     match normalized_lower.as_str() {
         "zh" | "zh-cn" | "zh-hans" | "zh-hans-cn" | "zh-sg" | "zh-hans-sg" => return Some("zh"),
-        "zh-tw" | "zh-hant-tw" => return Some("zh-TW"),
+        "zh-tw" | "zh-hant" | "zh-hant-tw" | "zh-hk" | "zh-hant-hk" | "zh-mo" | "zh-hant-mo" => {
+            return Some("zh-TW")
+        }
         value if value.starts_with("zh-") => return None,
         _ => {}
     }
@@ -231,8 +233,149 @@ impl SettingsService {
 mod tests {
     use super::{
         normalize_formatting_region, normalize_ui_language, validate_formatting_region,
-        validate_ui_language,
+        validate_ui_language, SettingsService, SettingsServiceTrait,
     };
+    use crate::fx::{ExchangeRate, FxServiceTrait, NewExchangeRate};
+    use crate::settings::{Settings, SettingsRepositoryTrait, SettingsUpdate};
+    use async_trait::async_trait;
+    use chrono::NaiveDate;
+    use rust_decimal::Decimal;
+    use std::sync::Arc;
+
+    struct PersistedSettingsRepository {
+        language: String,
+    }
+
+    #[async_trait]
+    impl SettingsRepositoryTrait for PersistedSettingsRepository {
+        fn get_settings(&self) -> crate::Result<Settings> {
+            Ok(Settings {
+                language: self.language.clone(),
+                ..Settings::default()
+            })
+        }
+
+        async fn update_settings(&self, _new_settings: &SettingsUpdate) -> crate::Result<()> {
+            unreachable!("settings updates are not used by this test")
+        }
+
+        fn get_setting(&self, _setting_key: &str) -> crate::Result<String> {
+            unreachable!("single-setting reads are not used by this test")
+        }
+
+        async fn update_setting(
+            &self,
+            _setting_key: &str,
+            _setting_value: &str,
+        ) -> crate::Result<()> {
+            unreachable!("single-setting updates are not used by this test")
+        }
+
+        fn get_distinct_currencies_excluding_base(
+            &self,
+            _base_currency: &str,
+        ) -> crate::Result<Vec<String>> {
+            unreachable!("currency reads are not used by this test")
+        }
+    }
+
+    struct UnusedFxService;
+
+    #[async_trait]
+    impl FxServiceTrait for UnusedFxService {
+        fn initialize(&self) -> crate::Result<()> {
+            unreachable!("FX is not used by this test")
+        }
+
+        fn get_historical_rates(
+            &self,
+            _from_currency: &str,
+            _to_currency: &str,
+            _days: i64,
+        ) -> crate::Result<Vec<ExchangeRate>> {
+            unreachable!("FX is not used by this test")
+        }
+
+        fn get_latest_exchange_rate(
+            &self,
+            _from_currency: &str,
+            _to_currency: &str,
+        ) -> crate::Result<Decimal> {
+            unreachable!("FX is not used by this test")
+        }
+
+        fn get_exchange_rate_for_date(
+            &self,
+            _from_currency: &str,
+            _to_currency: &str,
+            _date: NaiveDate,
+        ) -> crate::Result<Decimal> {
+            unreachable!("FX is not used by this test")
+        }
+
+        fn convert_currency(
+            &self,
+            _amount: Decimal,
+            _from_currency: &str,
+            _to_currency: &str,
+        ) -> crate::Result<Decimal> {
+            unreachable!("FX is not used by this test")
+        }
+
+        fn convert_currency_for_date(
+            &self,
+            _amount: Decimal,
+            _from_currency: &str,
+            _to_currency: &str,
+            _date: NaiveDate,
+        ) -> crate::Result<Decimal> {
+            unreachable!("FX is not used by this test")
+        }
+
+        fn get_latest_exchange_rates(&self) -> crate::Result<Vec<ExchangeRate>> {
+            unreachable!("FX is not used by this test")
+        }
+
+        async fn add_exchange_rate(
+            &self,
+            _new_rate: NewExchangeRate,
+        ) -> crate::Result<ExchangeRate> {
+            unreachable!("FX is not used by this test")
+        }
+
+        async fn update_exchange_rate(
+            &self,
+            _from_currency: &str,
+            _to_currency: &str,
+            _rate: Decimal,
+        ) -> crate::Result<ExchangeRate> {
+            unreachable!("FX is not used by this test")
+        }
+
+        async fn delete_exchange_rate(&self, _rate_id: &str) -> crate::Result<()> {
+            unreachable!("FX is not used by this test")
+        }
+
+        async fn register_currency_pair(
+            &self,
+            _from_currency: &str,
+            _to_currency: &str,
+        ) -> crate::Result<()> {
+            unreachable!("FX is not used by this test")
+        }
+
+        async fn register_currency_pair_manual(
+            &self,
+            _from_currency: &str,
+            _to_currency: &str,
+        ) -> crate::Result<()> {
+            unreachable!("FX is not used by this test")
+        }
+
+        async fn ensure_fx_pairs(&self, _pairs: Vec<(String, String)>) -> crate::Result<()> {
+            unreachable!("FX is not used by this test")
+        }
+    }
 
     #[test]
     fn preserves_explicit_system_formatting_preference() {
@@ -251,9 +394,14 @@ mod tests {
         assert_eq!(normalize_ui_language("zh-Hans-SG"), "zh");
         assert_eq!(normalize_ui_language("zh-TW"), "zh-TW");
         assert_eq!(normalize_ui_language("zh_TW"), "zh-TW");
+        assert_eq!(normalize_ui_language("zh-Hant"), "zh-TW");
         assert_eq!(normalize_ui_language("zh-Hant-TW"), "zh-TW");
         assert_eq!(normalize_ui_language("zh_Hant_TW"), "zh-TW");
         assert_eq!(normalize_ui_language(" zh-hAnT-tW "), "zh-TW");
+        assert_eq!(normalize_ui_language("zh-HK"), "zh-TW");
+        assert_eq!(normalize_ui_language("zh_Hant_HK"), "zh-TW");
+        assert_eq!(normalize_ui_language("zh-MO"), "zh-TW");
+        assert_eq!(normalize_ui_language(" zh-hAnT-mO "), "zh-TW");
         assert_eq!(normalize_ui_language("ja-JP"), "ja");
         assert_eq!(normalize_ui_language("ko_KR"), "ko");
     }
@@ -263,8 +411,6 @@ mod tests {
         for language in [
             "foo_bar",
             "fr-CA-extra",
-            "zh-Hant",
-            "zh-HK",
             "zh-Hans-TW",
             "zh-TW-CN",
             "zh-foo-TW",
@@ -277,16 +423,28 @@ mod tests {
     fn rejects_unknown_ui_language_updates() {
         assert_eq!(validate_ui_language("ja-JP").unwrap(), "ja");
         assert_eq!(validate_ui_language("zh-TW").unwrap(), "zh-TW");
+        assert_eq!(validate_ui_language("zh-Hant").unwrap(), "zh-TW");
         assert_eq!(validate_ui_language("zh-Hant-TW").unwrap(), "zh-TW");
-        for language in [
-            "zh-Hant",
-            "zh-HK",
-            "zh-Hans-TW",
-            "zh-TW-CN",
-            "zh-foo-TW",
-            "foo_bar",
-        ] {
+        assert_eq!(validate_ui_language("zh-HK").unwrap(), "zh-TW");
+        assert_eq!(validate_ui_language("zh-Hant-HK").unwrap(), "zh-TW");
+        assert_eq!(validate_ui_language("zh-MO").unwrap(), "zh-TW");
+        assert_eq!(validate_ui_language("zh-Hant-MO").unwrap(), "zh-TW");
+        for language in ["zh-Hans-TW", "zh-TW-CN", "zh-foo-TW", "foo_bar"] {
             assert!(validate_ui_language(language).is_err());
+        }
+    }
+
+    #[test]
+    fn preserves_legacy_traditional_chinese_languages_from_persisted_settings() {
+        for language in ["zh-Hant", "zh-HK", "zh-MO"] {
+            let service = SettingsService::new(
+                Arc::new(PersistedSettingsRepository {
+                    language: language.to_string(),
+                }),
+                Arc::new(UnusedFxService),
+            );
+
+            assert_eq!(service.get_settings().unwrap().language, "zh-TW");
         }
     }
 
