@@ -110,6 +110,29 @@
     "modeVerbHybrid": "現金與賣出所得",
     "modeVerbCashFlow": "現金流"
   },
+  "eligibleHoldings": {
+    "label": "符合條件的持有部位",
+    "triggerLabel": "{{label}}：{{summary}}",
+    "rowLabel": "{{symbol}} {{name}} {{details}} — {{state}}",
+    "selected": "已選取",
+    "notSelected": "未選取",
+    "allSelected": "已選取所有持有部位",
+    "selectedCount": "已選取 {{selected}} 項，共 {{total}} 項",
+    "searchPlaceholder": "搜尋持有部位",
+    "noMatches": "找不到相符的持有部位。",
+    "selectAll": "全部選取",
+    "clear": "清除",
+    "emptyGuidance": "請至少選取一項持有部位以計算方案。",
+    "groups": {
+      "equity": "股權（股票、ETF、基金）",
+      "bond": "債券",
+      "crypto": "加密貨幣",
+      "option": "選擇權",
+      "metal": "金屬（商品）",
+      "fx": "外匯",
+      "other": "其他"
+    }
+  },
   "narrative": {
     "liftAndShrink": "{{verb}}將 {{lifted}} 提升至目標，並將 {{shrank}} 的超額配置從 {{before}} 降至 {{after}}。",
     "lift": "{{verb}}將 {{lifted}} 提升至目標。",

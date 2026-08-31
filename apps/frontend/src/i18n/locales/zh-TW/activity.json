@@ -1,4 +1,10 @@
 {
+  "needs_review_alert": {
+    "title_one": "{{count}} 筆交易紀錄需要檢查",
+    "title_other": "{{count}} 筆交易紀錄需要檢查",
+    "description": "請確認每筆交易的資產、類型與最終金額。",
+    "action": "檢查"
+  },
   "activities": "交易紀錄",
   "add_activity": "新增交易紀錄",
   "add_holdings": "新增持有部位",
@@ -555,6 +561,9 @@
     "available_amount": "可用：{{amount}}",
     "total_debit": "借方總額",
     "total_credit": "貸方總額",
+    "help_total_debit": "最終支付的現金金額，包含手續費與稅款。",
+    "help_total_credit": "最終收到的現金金額，已扣除手續費與稅款。",
+    "use_calculated_total": "使用計算出的總額（{{amount}}）",
     "warn_buy_while_short": "你目前持有此股票的空頭部位。請使用「買入回補」減少空頭部位；平倉後才能輸入一般買入。",
     "warn_cover_without_short": "所選帳戶必須先有此股票的空頭部位，才能買入回補。",
     "warn_cover_quantity_excess": "你要回補 {{covering}} 股，但目前空頭部位只有 {{short}} 股。請將超出的數量另記為一筆買入交易。",
@@ -598,6 +607,7 @@
     "err_currency_required": "幣別為必填。",
     "err_select_date": "請選取一個日期。",
     "err_enter_amount": "請輸入金額。",
+    "err_amount_non_negative": "金額不能為負數。",
     "err_enter_received_amount": "請輸入收到金額。",
     "err_amount_number": "金額必須為數字。",
     "err_amount_positive_number": "金額必須為正數。",
@@ -742,7 +752,10 @@
     "warn_dates_differ_one": "日期相差 {{count}} 天。",
     "warn_dates_differ_other": "日期相差 {{count}} 天。",
     "approve_count_one": "核准 {{count}} 筆",
-    "approve_count_other": "核准 {{count}} 筆"
+    "approve_count_other": "核准 {{count}} 筆",
+    "approve_missing_amount_one": "{{count}} 筆交易紀錄仍需填寫最終現金金額",
+    "approve_missing_amount_other": "{{count}} 筆交易紀錄仍需填寫最終現金金額",
+    "approve_missing_amount_description": "核准前，請為每筆空白或金額為零的交易輸入正確的最終現金金額。"
   },
   "table": {
     "cash": "現金",
