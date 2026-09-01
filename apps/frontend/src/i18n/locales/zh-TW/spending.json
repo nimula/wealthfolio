@@ -54,7 +54,7 @@
     "matchExact": "完全符合",
     "matchRegex": "正規表示式",
     "activityDeposit": "存入",
-    "activityWithdrawal": "取出",
+    "activityWithdrawal": "支出／提領",
     "activityCredit": "退款/退回",
     "activityInterest": "利息",
     "activityDividend": "股利",
