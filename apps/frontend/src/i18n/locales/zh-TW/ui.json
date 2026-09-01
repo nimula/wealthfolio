@@ -51,7 +51,7 @@
     "fileUpload": "上傳檔案",
     "dropFilesHere": "將檔案放到這裡",
     "dragFilesHere": "將檔案拖曳到這裡",
-    "clickToBrowse": "或按一下選擇檔案",
+    "clickToBrowse": "或點選選擇檔案",
     "maxSize": "檔案大小上限：{{size}}",
     "maxFiles": "最多 {{count}} 個檔案",
     "maxSizeAndFiles": "檔案大小上限：{{size}} • 最多 {{count}} 個檔案",

@@ -32,7 +32,7 @@
   "type_fee": "手續費",
   "type_tax": "稅款",
   "type_split": "拆股",
-  "type_credit": "款項入帳",
+  "type_credit": "退款／回饋",
   "type_adjustment": "調整",
   "type_unknown": "未知",
   "subtype_drip": "股利再投資（DRIP）",
