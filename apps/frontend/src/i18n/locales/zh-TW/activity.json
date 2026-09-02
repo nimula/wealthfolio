@@ -135,7 +135,6 @@
   "duplicate": "建立副本",
   "delete": "刪除",
   "loading": "載入中……",
-  "load_more": "載入更多……",
   "search_placeholder": "搜尋……",
   "clear_search": "清除搜尋",
   "filter_account": "帳戶",
@@ -1213,7 +1212,9 @@
       "positionsCount_one": "{{count}} 項持有部位",
       "positionsCount_other": "{{count}} 項持有部位",
       "readyRows_one": "{{count}} 列",
-      "readyRows_other": "{{count}} 列"
+      "readyRows_other": "{{count}} 列",
+      "ambiguousDateTitle": "日期順序不明確",
+      "ambiguousDateHint": "像 {{example}} 這樣的日期可能是日／月，也可能是月／日，無法從這個檔案判斷。請返回並選擇日期格式，不要使用自動偵測。"
     },
     "symbolPanel": {
       "unrecognized_one": "{{count}} 個無法辨識的代號",
