@@ -55,6 +55,63 @@ describe("addon sandbox i18n", () => {
     expect(i18n.language).toBe("fr");
   });
 
+  it("normalizes zh-TW to zh-Hant without falling through to zh", async () => {
+    const { initSandboxI18n } = await loadSandboxI18n();
+
+    const i18n = initSandboxI18n("zh-TW");
+
+    expect(i18n.language).toBe("zh-Hant");
+    expect(i18n.languages).toContain("en");
+    expect(i18n.languages).not.toContain("zh");
+    expect(i18n.t("ui:sheet.close")).toBe("關閉");
+    expect(document.documentElement.getAttribute("lang")).toBe("zh-Hant");
+
+    i18n.removeResourceBundle("zh-Hant", "ui");
+    expect(i18n.t("ui:sheet.close")).toBe("Close");
+  });
+
+  it("normalizes allow-listed Taiwan Traditional Chinese variants", async () => {
+    const { initSandboxI18n, setSandboxLanguage } = await loadSandboxI18n();
+
+    const i18n = initSandboxI18n(" zh_hAnT_tW ");
+
+    expect(i18n.language).toBe("zh-Hant");
+    expect(document.documentElement.getAttribute("lang")).toBe("zh-Hant");
+
+    for (const language of ["zh-Hant", "zh-HK", "zh-Hant-HK"]) {
+      setSandboxLanguage(language);
+      expect(i18n.language).toBe("zh-Hant");
+      expect(document.documentElement.getAttribute("lang")).toBe("zh-Hant");
+    }
+
+    for (const language of ["zh-TW-CN", "zh-foo-TW"]) {
+      setSandboxLanguage(language);
+      expect(i18n.language).toBe("zh-Hant");
+      expect(document.documentElement.getAttribute("lang")).toBe("zh-Hant");
+    }
+  });
+
+  it("normalizes allow-listed Simplified Chinese variants", async () => {
+    const { initSandboxI18n, setSandboxLanguage } = await loadSandboxI18n();
+
+    const i18n = initSandboxI18n("zh-Hans-CN");
+
+    expect(i18n.language).toBe("zh");
+
+    setSandboxLanguage("zh_Hans_SG");
+    expect(i18n.language).toBe("zh");
+    expect(document.documentElement.getAttribute("lang")).toBe("zh");
+  });
+
+  it("keeps an explicit Hans script on Simplified Chinese", async () => {
+    const { initSandboxI18n } = await loadSandboxI18n();
+
+    const i18n = initSandboxI18n("zh-Hans-TW");
+
+    expect(i18n.language).toBe("zh");
+    expect(document.documentElement.getAttribute("lang")).toBe("zh");
+  });
+
   it("defaults to the default locale when the host sends no language", async () => {
     const { initSandboxI18n } = await loadSandboxI18n();
     const { DEFAULT_LOCALE } = await import("@/i18n/locales");

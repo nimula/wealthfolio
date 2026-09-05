@@ -70,8 +70,9 @@ function RegionalFormattedMonth() {
   return <span>{formatting.formatCalendarDate("2026-01-01", { month: "long" })}</span>;
 }
 
-function UILocaleConsumer() {
-  return <span>{useLocalizationSettings().uiLocale}</span>;
+function LocalizationSettingsConsumer() {
+  const { locale, uiLocale } = useLocalizationSettings();
+  return <span>{locale + "|" + uiLocale}</span>;
 }
 
 describe("FormattingProvider", () => {
@@ -106,24 +107,57 @@ describe("FormattingProvider", () => {
     expect(screen.getByText("Januar")).toBeInTheDocument();
   });
 
-  it("keeps the UI locale available separately from the formatting locale", () => {
-    render(
-      <FormattingProvider locale="DE" uiLocale="en">
-        <UILocaleConsumer />
-        <RegionalNumber />
-        <DatePickerInput value="2026-08-18" onChange={() => undefined} />
-      </FormattingProvider>,
-    );
+  it.each([
+    {
+      formattingLocale: "DE",
+      uiLocale: "zh-TW",
+      expectedSettings: "de-DE|zh-TW",
+      expectedNumber: "1.234,56",
+      expectedSegments: ["year", "month", "day"],
+      expectedDescription: /選定的日期：/,
+    },
+    {
+      formattingLocale: "TW",
+      uiLocale: "zh",
+      expectedSettings: "zh-TW|zh",
+      expectedNumber: "1,234.56",
+      expectedSegments: ["year", "month", "day"],
+      expectedDescription: /\u9009\u5b9a\u7684\u65e5\u671f\uff1a/,
+    },
+    {
+      formattingLocale: "TW",
+      uiLocale: "en",
+      expectedSettings: "zh-TW|en",
+      expectedNumber: "1,234.56",
+      expectedSegments: ["month", "day", "year"],
+      expectedDescription: /Selected Date:/,
+    },
+  ])(
+    "keeps the $uiLocale UI locale separate from the $formattingLocale formatting region",
+    ({
+      formattingLocale,
+      uiLocale,
+      expectedSettings,
+      expectedNumber,
+      expectedSegments,
+      expectedDescription,
+    }) => {
+      render(
+        <FormattingProvider locale={formattingLocale} uiLocale={uiLocale}>
+          <LocalizationSettingsConsumer />
+          <RegionalNumber />
+          <DatePickerInput value="2026-08-18" onChange={() => undefined} />
+        </FormattingProvider>,
+      );
 
-    expect(screen.getByText("en")).toBeInTheDocument();
-    expect(screen.getByText("1.234,56")).toBeInTheDocument();
-    expect(screen.getByRole("spinbutton", { name: /month/i })).toBeInTheDocument();
-    expect(screen.getAllByRole("spinbutton").map((segment) => segment.dataset.type)).toEqual([
-      "day",
-      "month",
-      "year",
-    ]);
-  });
+      expect(screen.getByText(expectedSettings)).toBeInTheDocument();
+      expect(screen.getByText(expectedNumber)).toBeInTheDocument();
+      expect(screen.getByText(expectedDescription)).toBeInTheDocument();
+      expect(screen.getAllByRole("spinbutton").map((segment) => segment.dataset.type)).toEqual(
+        expectedSegments,
+      );
+    },
+  );
 
   it("reuses the provider-owned finance service across consumers", () => {
     observedAmountServices.length = 0;

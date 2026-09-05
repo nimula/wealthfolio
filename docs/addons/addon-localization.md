@@ -72,6 +72,11 @@ export default function enable(ctx: AddonContext) {
       title: "Prévision de dividendes",
       greeting: "Bonjour {{name}}",
     },
+    "zh-Hant": {
+      title: "股利預測",
+      greeting: "{{name}}，你好",
+      holdings_other: "{{count}} 筆持股",
+    },
   });
 
   // ... register routes / sidebar items
@@ -100,9 +105,12 @@ Behavior and rules:
   separately from `zh`. A missing `zh-Hant` string falls back to your `en`
   bundle, never to `zh`: Simplified glyphs in a Traditional UI read as broken
   rather than untranslated.
+
 - **Fallback is your `en` bundle.** If the current language is missing a key (or
   the whole bundle), lookup falls back to your `en` resources; if that is
   missing too, the key itself is rendered. Always ship a complete `en` bundle.
+  In particular, missing `zh-Hant` content falls back directly to `en`; it never
+  uses the Simplified Chinese `zh` bundle.
 - **Interpolation and plurals** use standard i18next syntax: `{{name}}`
   placeholders, and `_one` / `_other` plural suffixes driven by
   `t('holdings', { count })`. `$t()` nesting inside translation values is
@@ -111,6 +119,44 @@ Behavior and rules:
 - Components re-render automatically on language changes and on (late)
   `registerTranslations` calls, but registering in `enable()` before the first
   render avoids a flash of untranslated keys.
+
+### Traditional Chinese (`zh-Hant`)
+
+Use the canonical `zh-Hant` key when registering Traditional Chinese resources:
+
+```tsx
+registerTranslations({
+  en: {
+    emptyState: "No holdings yet",
+  },
+  "zh-Hant": {
+    emptyState: "尚無持股",
+  },
+});
+```
+
+The registration API also normalizes Traditional Chinese aliases including
+`zh-TW`, `zh_Hant_TW`, `zh-HK`, and `zh-MO` to `zh-Hant`. An explicit `Hans`
+script normalizes to the Simplified Chinese `zh` bundle. Malformed or ambiguous
+tags are ignored with a warning rather than being silently assigned to either
+Chinese catalog.
+
+Traditional Chinese uses i18next's `_other` plural form for numeric counts.
+Provide that suffix when a key is called with `{ count }`, even when the text is
+identical for every count:
+
+```tsx
+registerTranslations({
+  "zh-Hant": {
+    holdings_other: "{{count}} 筆持股",
+  },
+});
+
+function HoldingCount({ count }: { count: number }) {
+  const { t } = useAddonTranslation();
+  return <span>{t("holdings", { count })}</span>;
+}
+```
 
 ### Languages beyond the host's set
 

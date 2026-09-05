@@ -16,6 +16,14 @@ import {
 } from "date-fns/locale";
 import { useLocalizationSettings } from "../components/formatting-provider";
 
+const ZH_TW_LOCALE: Locale = {
+  ...zhTW,
+  options: {
+    weekStartsOn: 0,
+    firstWeekContainsDate: 1,
+  },
+};
+
 const DATE_FNS_LOCALES: Record<string, Locale> = {
   "en-CA": enCA,
   "en-US": enUS,
@@ -53,6 +61,7 @@ const REGION_LOCALES: Record<string, Locale> = {
   BR: ptBR,
   PT: pt,
   CN: zhCN,
+  TW: ZH_TW_LOCALE,
   JP: ja,
   KR: ko,
 };
@@ -94,11 +103,8 @@ function createIntlLocale(locale: string, options: Locale["options"]): Locale {
 
 export function dateFnsLocaleFor(locale: string | undefined): Locale {
   if (!locale) throw new Error("A resolved formatting locale is required for date-fns");
-  const exact = DATE_FNS_LOCALES[locale];
-  if (exact) return exact;
 
   const resolved = new Intl.Locale(locale);
-
   // Traditional script needs zhTW's calendar text (大約 3 小時, not 大约 3 小时), but
   // date-fns ships Taiwan with a Monday week start while CLDR says Sunday. Take the
   // text from zhTW and let the week-info path below own the conventions, exactly as
@@ -107,7 +113,11 @@ export function dateFnsLocaleFor(locale: string | undefined): Locale {
     resolved.language === "zh" &&
     (resolved.script === "Hant" || ["TW", "HK", "MO"].includes(resolved.region ?? ""));
 
-  const languageLocale = traditionalChinese ? zhTW : LANGUAGE_LOCALES[resolved.language];
+  // Exact entries select calendar text only. Week conventions still come from
+  // Intl below so date-fns defaults cannot override the selected region's CLDR data.
+  const exactLocale = DATE_FNS_LOCALES[locale];
+  const textLocale =
+    exactLocale ?? (traditionalChinese ? ZH_TW_LOCALE : LANGUAGE_LOCALES[resolved.language]);
   const regionLocale = resolved.region ? REGION_LOCALES[resolved.region] : undefined;
   const localeWithWeekInfo = resolved as Intl.Locale & {
     getWeekInfo?: () => { firstDay: number; minimalDays: number };
@@ -120,11 +130,11 @@ export function dateFnsLocaleFor(locale: string | undefined): Locale {
         firstWeekContainsDate: weekInfo.minimalDays === 4 ? 4 : 1,
       }
     : regionLocale?.options;
-  if (!languageLocale) return createIntlLocale(locale, options);
-  if (!options) return languageLocale;
+  if (!textLocale) return createIntlLocale(locale, options);
+  if (!options) return textLocale;
 
   // date-fns owns calendar text while the selected region owns week conventions.
-  return { ...languageLocale, code: locale, options };
+  return { ...textLocale, code: exactLocale?.code ?? locale, options };
 }
 
 export function useDateFnsLocale(): Locale {

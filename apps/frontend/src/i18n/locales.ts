@@ -25,7 +25,7 @@ export const SUPPORTED_LOCALE_CODES = SUPPORTED_LOCALES.map((l) => l.code);
 // Traditional Chinese is written in Taiwan, Hong Kong and Macau, with or without
 // an explicit `Hant` subtag. Mirrors `is_traditional_chinese_alias` in
 // crates/core/src/settings/settings_service.rs.
-const TRADITIONAL_CHINESE_SUBTAGS = ["hant", "tw", "hk", "mo"];
+const TRADITIONAL_CHINESE_REGIONS = ["tw", "hk", "mo"];
 
 /**
  * Map an arbitrary language tag onto a supported locale code.
@@ -38,19 +38,48 @@ const TRADITIONAL_CHINESE_SUBTAGS = ["hant", "tw", "hk", "mo"];
  * which may itself be unsupported; callers validate.
  */
 export function normalizeLocaleCode(language: string): string {
-  const parts = language.toLowerCase().split(/[-_]/);
-  if (parts[0] === "zh" && !parts.includes("hans")) {
-    // An explicit `Hans` script wins over a Traditional region, so `zh-Hans-TW`
-    // stays Simplified.
-    if (parts.slice(1).some((part) => TRADITIONAL_CHINESE_SUBTAGS.includes(part))) {
-      return "zh-Hant";
+  const normalized = language.trim().replaceAll("_", "-");
+  const parts = normalized.toLowerCase().split("-");
+  const [base, ...subtags] = parts;
+
+  if (base === "zh") {
+    let script: string | undefined;
+    let region: string | undefined;
+
+    for (const subtag of subtags) {
+      if (/^[a-z]{4}$/.test(subtag) && !script && !region) {
+        script = subtag;
+      } else if (/^[a-z]{2}$/.test(subtag) && !region) {
+        region = subtag;
+      } else {
+        return normalized;
+      }
     }
+
+    // An explicit script wins over the region, so `zh-Hans-TW` stays
+    // Simplified while `zh-Hant-CN` stays Traditional.
+    if (script === "hans") return "zh";
+    if (script === "hant") return "zh-Hant";
+    if (script) return normalized;
+    if (region && TRADITIONAL_CHINESE_REGIONS.includes(region)) return "zh-Hant";
+    return "zh";
   }
 
   const supported = SUPPORTED_LOCALE_CODES.find(
-    (locale) => locale.toLowerCase() === language.toLowerCase(),
+    (locale) => locale.toLowerCase() === normalized.toLowerCase(),
   );
-  return supported ?? parts[0];
+  if (supported) return supported;
+
+  const [candidateBase, candidateRegion, ...extra] = parts;
+  if (
+    !/^[a-z]{2,3}$/.test(candidateBase) ||
+    (candidateRegion !== undefined && !/^[a-z]{2}$/.test(candidateRegion)) ||
+    extra.length > 0
+  ) {
+    return normalized;
+  }
+
+  return candidateBase;
 }
 
 // Translation namespaces (one JSON file per namespace per locale).

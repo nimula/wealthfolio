@@ -46,6 +46,10 @@ const resources: Record<LocaleCode, { ui: Record<string, unknown> }> = {
   "zh-Hant": { ui: zhHantUi },
 };
 
+function resolveSandboxLanguage(language: string) {
+  const normalized = normalizeLocaleCode(language);
+  return SUPPORTED_LOCALE_CODES.includes(normalized as LocaleCode) ? normalized : undefined;
+}
 function applyDocumentLanguage(language: string) {
   // Han unification: ja/ko/zh share codepoints that render with different
   // preferred glyphs, so the iframe document needs its own lang attribute.
@@ -63,7 +67,9 @@ export function initSandboxI18n(language?: string) {
     return sandboxI18n;
   }
 
-  const initialLanguage = language ? normalizeLocaleCode(language) : DEFAULT_LOCALE;
+  const initialLanguage = language
+    ? (resolveSandboxLanguage(language) ?? DEFAULT_LOCALE)
+    : DEFAULT_LOCALE;
 
   // `initReactI18next` also registers this instance as react-i18next's default,
   // so `@wealthfolio/ui` components resolve it without an I18nextProvider.
@@ -95,7 +101,10 @@ export function setSandboxLanguage(language?: string) {
     return;
   }
 
-  const normalized = normalizeLocaleCode(language);
+  const normalized = resolveSandboxLanguage(language);
+  if (!normalized) {
+    return;
+  }
   // Each instance is synced independently and idempotently — returning early
   // because one of them already matches could leave the other out of sync.
   if (sandboxI18n.language !== normalized) {

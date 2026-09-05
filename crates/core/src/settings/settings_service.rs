@@ -14,63 +14,73 @@ const SUPPORTED_UI_LANGUAGES: &[&str] = &[
     "en", "fr", "de", "es", "pt", "zh", "zh-Hant", "ja", "ko", "it",
 ];
 
-/// Traditional Chinese is written in Taiwan, Hong Kong and Macau. Match the
-/// script subtag (`Hant`) or any of those regions, so a bare `zh-HK` resolves
-/// the same way an explicit `zh-Hant-HK` already does.
-fn is_traditional_chinese_alias(language: &str) -> bool {
-    let mut parts = language.split(['-', '_']);
-    if !matches!(parts.next(), Some(part) if part.eq_ignore_ascii_case("zh")) {
-        return false;
+/// Resolve a valid language tag to a supported UI language. Traditional
+/// Chinese is selected by the `Hant` script or the TW/HK/MO regions, while an
+/// explicit `Hans` script always stays Simplified.
+fn resolve_ui_language(language: &str) -> Option<&'static str> {
+    let normalized = language.trim().replace('_', "-");
+    let parts: Vec<String> = normalized
+        .split('-')
+        .map(|part| part.to_ascii_lowercase())
+        .collect();
+    let base = parts.first()?;
+
+    if base == "zh" {
+        let mut script: Option<&str> = None;
+        let mut region: Option<&str> = None;
+
+        for subtag in &parts[1..] {
+            if subtag.len() == 4
+                && subtag.bytes().all(|byte| byte.is_ascii_alphabetic())
+                && script.is_none()
+                && region.is_none()
+            {
+                script = Some(subtag);
+            } else if subtag.len() == 2
+                && subtag.bytes().all(|byte| byte.is_ascii_alphabetic())
+                && region.is_none()
+            {
+                region = Some(subtag);
+            } else {
+                return None;
+            }
+        }
+
+        return match script {
+            Some("hans") => Some("zh"),
+            Some("hant") => Some("zh-Hant"),
+            Some(_) => None,
+            None if region.is_some_and(|value| ["tw", "hk", "mo"].contains(&value)) => {
+                Some("zh-Hant")
+            }
+            None => Some("zh"),
+        };
     }
 
-    let subtags: Vec<&str> = parts.collect();
-    // An explicit `Hans` script wins over a Traditional region, so `zh-Hans-TW`
-    // stays Simplified.
-    if subtags.iter().any(|part| part.eq_ignore_ascii_case("hans")) {
-        return false;
+    if !matches!(base.len(), 2 | 3)
+        || !base.bytes().all(|byte| byte.is_ascii_alphabetic())
+        || parts.len() > 2
+        || parts.get(1).is_some_and(|region| {
+            region.len() != 2 || !region.bytes().all(|byte| byte.is_ascii_alphabetic())
+        })
+    {
+        return None;
     }
 
-    subtags.iter().any(|part| {
-        ["hant", "tw", "hk", "mo"]
-            .iter()
-            .any(|alias| part.eq_ignore_ascii_case(alias))
-    })
+    SUPPORTED_UI_LANGUAGES
+        .iter()
+        .copied()
+        .find(|supported| !supported.contains('-') && supported.eq_ignore_ascii_case(base))
 }
 
 fn normalize_ui_language(language: &str) -> String {
-    if is_traditional_chinese_alias(language) {
-        return "zh-Hant".to_string();
-    }
-
-    if SUPPORTED_UI_LANGUAGES.contains(&language) {
-        return language.to_string();
-    }
-
-    let base = language.split(['-', '_']).next().unwrap_or(language);
-    if SUPPORTED_UI_LANGUAGES.contains(&base) {
-        base.to_string()
-    } else {
-        "en".to_string()
-    }
+    resolve_ui_language(language).unwrap_or("en").to_string()
 }
 
 fn validate_ui_language(language: &str) -> Result<String> {
-    if is_traditional_chinese_alias(language) {
-        return Ok("zh-Hant".to_string());
-    }
-
-    if SUPPORTED_UI_LANGUAGES.contains(&language) {
-        return Ok(language.to_string());
-    }
-
-    let base = language.split(['-', '_']).next().unwrap_or(language);
-    if SUPPORTED_UI_LANGUAGES.contains(&base) {
-        Ok(base.to_string())
-    } else {
-        Err(Error::InvalidConfigValue(format!(
-            "Unsupported UI language: {language}"
-        )))
-    }
+    resolve_ui_language(language)
+        .map(str::to_string)
+        .ok_or_else(|| Error::InvalidConfigValue(format!("Unsupported UI language: {language}")))
 }
 
 fn normalize_formatting_region(_language: &str, formatting_region: &str) -> String {
@@ -252,8 +262,149 @@ impl SettingsService {
 mod tests {
     use super::{
         normalize_formatting_region, normalize_ui_language, validate_formatting_region,
-        validate_ui_language,
+        validate_ui_language, SettingsService, SettingsServiceTrait,
     };
+    use crate::fx::{ExchangeRate, FxServiceTrait, NewExchangeRate};
+    use crate::settings::{Settings, SettingsRepositoryTrait, SettingsUpdate};
+    use async_trait::async_trait;
+    use chrono::NaiveDate;
+    use rust_decimal::Decimal;
+    use std::sync::Arc;
+
+    struct PersistedSettingsRepository {
+        language: String,
+    }
+
+    #[async_trait]
+    impl SettingsRepositoryTrait for PersistedSettingsRepository {
+        fn get_settings(&self) -> crate::Result<Settings> {
+            Ok(Settings {
+                language: self.language.clone(),
+                ..Settings::default()
+            })
+        }
+
+        async fn update_settings(&self, _new_settings: &SettingsUpdate) -> crate::Result<()> {
+            unreachable!("settings updates are not used by this test")
+        }
+
+        fn get_setting(&self, _setting_key: &str) -> crate::Result<String> {
+            unreachable!("single-setting reads are not used by this test")
+        }
+
+        async fn update_setting(
+            &self,
+            _setting_key: &str,
+            _setting_value: &str,
+        ) -> crate::Result<()> {
+            unreachable!("single-setting updates are not used by this test")
+        }
+
+        fn get_distinct_currencies_excluding_base(
+            &self,
+            _base_currency: &str,
+        ) -> crate::Result<Vec<String>> {
+            unreachable!("currency reads are not used by this test")
+        }
+    }
+
+    struct UnusedFxService;
+
+    #[async_trait]
+    impl FxServiceTrait for UnusedFxService {
+        fn initialize(&self) -> crate::Result<()> {
+            unreachable!("FX is not used by this test")
+        }
+
+        fn get_historical_rates(
+            &self,
+            _from_currency: &str,
+            _to_currency: &str,
+            _days: i64,
+        ) -> crate::Result<Vec<ExchangeRate>> {
+            unreachable!("FX is not used by this test")
+        }
+
+        fn get_latest_exchange_rate(
+            &self,
+            _from_currency: &str,
+            _to_currency: &str,
+        ) -> crate::Result<Decimal> {
+            unreachable!("FX is not used by this test")
+        }
+
+        fn get_exchange_rate_for_date(
+            &self,
+            _from_currency: &str,
+            _to_currency: &str,
+            _date: NaiveDate,
+        ) -> crate::Result<Decimal> {
+            unreachable!("FX is not used by this test")
+        }
+
+        fn convert_currency(
+            &self,
+            _amount: Decimal,
+            _from_currency: &str,
+            _to_currency: &str,
+        ) -> crate::Result<Decimal> {
+            unreachable!("FX is not used by this test")
+        }
+
+        fn convert_currency_for_date(
+            &self,
+            _amount: Decimal,
+            _from_currency: &str,
+            _to_currency: &str,
+            _date: NaiveDate,
+        ) -> crate::Result<Decimal> {
+            unreachable!("FX is not used by this test")
+        }
+
+        fn get_latest_exchange_rates(&self) -> crate::Result<Vec<ExchangeRate>> {
+            unreachable!("FX is not used by this test")
+        }
+
+        async fn add_exchange_rate(
+            &self,
+            _new_rate: NewExchangeRate,
+        ) -> crate::Result<ExchangeRate> {
+            unreachable!("FX is not used by this test")
+        }
+
+        async fn update_exchange_rate(
+            &self,
+            _from_currency: &str,
+            _to_currency: &str,
+            _rate: Decimal,
+        ) -> crate::Result<ExchangeRate> {
+            unreachable!("FX is not used by this test")
+        }
+
+        async fn delete_exchange_rate(&self, _rate_id: &str) -> crate::Result<()> {
+            unreachable!("FX is not used by this test")
+        }
+
+        async fn register_currency_pair(
+            &self,
+            _from_currency: &str,
+            _to_currency: &str,
+        ) -> crate::Result<()> {
+            unreachable!("FX is not used by this test")
+        }
+
+        async fn register_currency_pair_manual(
+            &self,
+            _from_currency: &str,
+            _to_currency: &str,
+        ) -> crate::Result<()> {
+            unreachable!("FX is not used by this test")
+        }
+
+        async fn ensure_fx_pairs(&self, _pairs: Vec<(String, String)>) -> crate::Result<()> {
+            unreachable!("FX is not used by this test")
+        }
+    }
 
     #[test]
     fn preserves_explicit_system_formatting_preference() {
@@ -266,6 +417,20 @@ mod tests {
     fn normalizes_legacy_full_locale_to_supported_ui_language() {
         assert_eq!(normalize_ui_language("en-US"), "en");
         assert_eq!(normalize_ui_language("fr_CA"), "fr");
+        assert_eq!(normalize_ui_language("zh-CN"), "zh");
+        assert_eq!(normalize_ui_language("zh-Hans"), "zh");
+        assert_eq!(normalize_ui_language("zh_Hans_CN"), "zh");
+        assert_eq!(normalize_ui_language("zh-Hans-SG"), "zh");
+        assert_eq!(normalize_ui_language("zh-TW"), "zh-Hant");
+        assert_eq!(normalize_ui_language("zh_TW"), "zh-Hant");
+        assert_eq!(normalize_ui_language("zh-Hant"), "zh-Hant");
+        assert_eq!(normalize_ui_language("zh-Hant-TW"), "zh-Hant");
+        assert_eq!(normalize_ui_language("zh_Hant_TW"), "zh-Hant");
+        assert_eq!(normalize_ui_language(" zh-hAnT-tW "), "zh-Hant");
+        assert_eq!(normalize_ui_language("zh-HK"), "zh-Hant");
+        assert_eq!(normalize_ui_language("zh_Hant_HK"), "zh-Hant");
+        assert_eq!(normalize_ui_language("zh-MO"), "zh-Hant");
+        assert_eq!(normalize_ui_language(" zh-hAnT-mO "), "zh-Hant");
         assert_eq!(normalize_ui_language("ja-JP"), "ja");
         assert_eq!(normalize_ui_language("ko_KR"), "ko");
     }
@@ -322,18 +487,45 @@ mod tests {
 
     #[test]
     fn falls_back_when_a_persisted_ui_language_is_invalid() {
-        assert_eq!(normalize_ui_language("foo_bar"), "en");
+        for language in ["foo_bar", "fr-CA-extra", "zh-TW-CN", "zh-foo-TW"] {
+            assert_eq!(normalize_ui_language(language), "en");
+        }
     }
 
     #[test]
     fn rejects_unknown_ui_language_updates() {
         assert_eq!(validate_ui_language("ja-JP").unwrap(), "ja");
-        assert!(validate_ui_language("foo_bar").is_err());
+        assert_eq!(validate_ui_language("zh-TW").unwrap(), "zh-Hant");
+        assert_eq!(validate_ui_language("zh-Hant").unwrap(), "zh-Hant");
+        assert_eq!(validate_ui_language("zh-Hant-TW").unwrap(), "zh-Hant");
+        assert_eq!(validate_ui_language("zh-HK").unwrap(), "zh-Hant");
+        assert_eq!(validate_ui_language("zh-Hant-HK").unwrap(), "zh-Hant");
+        assert_eq!(validate_ui_language("zh-MO").unwrap(), "zh-Hant");
+        assert_eq!(validate_ui_language("zh-Hant-MO").unwrap(), "zh-Hant");
+        assert_eq!(validate_ui_language("zh-Hans-TW").unwrap(), "zh");
+        for language in ["zh-TW-CN", "zh-foo-TW", "foo_bar"] {
+            assert!(validate_ui_language(language).is_err());
+        }
+    }
+
+    #[test]
+    fn preserves_legacy_traditional_chinese_languages_from_persisted_settings() {
+        for language in ["zh-Hant", "zh-HK", "zh-MO"] {
+            let service = SettingsService::new(
+                Arc::new(PersistedSettingsRepository {
+                    language: language.to_string(),
+                }),
+                Arc::new(UnusedFxService),
+            );
+
+            assert_eq!(service.get_settings().unwrap().language, "zh-Hant");
+        }
     }
 
     #[test]
     fn keeps_explicit_formatting_region_separate_from_ui_language() {
         assert_eq!(normalize_formatting_region("en", "de-DE"), "DE");
+        assert_eq!(normalize_formatting_region("zh-TW", "TW"), "TW");
     }
 
     #[test]
@@ -344,6 +536,7 @@ mod tests {
     #[test]
     fn rejects_unknown_formatting_region_updates() {
         assert!(validate_formatting_region("DE").is_ok());
+        assert!(validate_formatting_region("TW").is_ok());
         assert!(validate_formatting_region("JP").is_ok());
         assert!(validate_formatting_region("KR").is_ok());
         assert!(validate_formatting_region("TW").is_ok());

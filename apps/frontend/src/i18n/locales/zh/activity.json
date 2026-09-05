@@ -1195,7 +1195,9 @@
       "importSnapshots_other": "导入 {{count}} 个快照",
       "failedToPrepareAssets": "为导入准备资产失败。",
       "positionsCount_other": "{{count}} 项持仓",
-      "readyRows_other": "{{count}} 行"
+      "readyRows_other": "{{count}} 行",
+      "ambiguousDateTitle": "日期顺序不明确",
+      "ambiguousDateHint": "像 {{example}} 这样的日期既可按日/月解读，也可按月/日解读，此文件中没有足够信息加以判断。请返回并选择日期格式，而不是自动检测。"
     },
     "symbolPanel": {
       "unrecognized_one": "{{count}} 个无法识别的代码",
