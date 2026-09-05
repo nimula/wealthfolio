@@ -50,12 +50,24 @@ function FormattingRuntime({ settings, children }: { settings: LocalizationSetti
 }
 
 function resolveInterfaceLocale(uiLocale: string, formattingLocale: string): string {
+  const ui = new Intl.Locale(uiLocale);
   const formatting = new Intl.Locale(formattingLocale);
   const options: Intl.LocaleOptions = {};
   if (formatting.region) options.region = formatting.region;
   if (formatting.calendar) options.calendar = formatting.calendar;
   if (formatting.numberingSystem) options.numberingSystem = formatting.numberingSystem;
-  return new Intl.Locale(uiLocale, options).toString();
+  if (ui.language === "zh" && ui.maximize().script !== "Hant") {
+    delete options.region;
+    return new Intl.Locale("zh-CN", options).toString();
+  }
+  if (ui.language === "zh" && ui.maximize().script === "Hant") {
+    // React Aria ships Traditional Chinese strings under zh-TW only. Its
+    // dictionary matcher otherwise falls through to the Simplified zh bundle,
+    // including when Unicode extensions are appended. App-owned formatting
+    // continues to use resolvedLocale with its calendar and numbering system.
+    return "zh-TW";
+  }
+  return new Intl.Locale(ui.toString(), options).toString();
 }
 
 export function FormattingProvider({

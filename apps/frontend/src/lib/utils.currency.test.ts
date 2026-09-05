@@ -1,10 +1,28 @@
+import { createFormatter, resolveFormattingLocale } from "@wealthfolio/ui";
 import { describe, expect, it } from "vitest";
-import { createFormatter } from "@wealthfolio/ui";
-import { normalizeCurrency } from "./utils";
+import { detectDefaultCurrency, normalizeCurrency } from "./utils";
 
 const formatting = createFormatter("en-US");
 
 describe("currency utilities", () => {
+  it.each([
+    [resolveFormattingLocale("TW"), "TWD"],
+    ["en-TW", "TWD"],
+    ["zh-Hant-TW", "TWD"],
+    ["zh-Hant-HK", "HKD"],
+    ["zh-Hant-MO", "MOP"],
+    ["pt-BR", "BRL"],
+    ["pt-PT", "EUR"],
+    ["zh", "CNY"],
+    ["zh-Hans", "CNY"],
+    ["zh-CN", "CNY"],
+    ["zh-Hant", undefined],
+    ["zh-HK", "HKD"],
+    ["zh-SG", undefined],
+  ])("suggests the expected currency for %s", (locale, expected) => {
+    expect(detectDefaultCurrency(locale)).toBe(expected);
+  });
+
   it("does not treat GBP as the GBp quote unit", () => {
     expect(normalizeCurrency("GBP")).toBe("GBP");
     expect(normalizeCurrency("gbp")).toBe("GBP");

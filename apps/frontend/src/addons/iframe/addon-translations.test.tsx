@@ -200,6 +200,35 @@ describe("addon translation runtime", () => {
     expect(await screen.findByText("Hello Aziz")).toBeInTheDocument();
   });
 
+  it("normalizes Traditional resources to zh-Hant without falling through to zh", async () => {
+    const { initSandboxI18n, installAddonTranslationRuntime } = await loadSandbox();
+    initSandboxI18n("zh-TW");
+    installAddonTranslationRuntime("sample-addon");
+
+    registerTranslations({
+      en: { fallback: "English fallback", greeting: "Hello {{name}}" },
+      zh: { fallback: "Simplified fallback", greeting: "简体 {{name}}" },
+      "zh-Hant-TW": { greeting: "繁體 {{name}}" },
+    });
+
+    function ZhHantProbe() {
+      const { language, t } = useAddonTranslation();
+      return (
+        <>
+          <span data-testid="language">{language}</span>
+          <span>{t("greeting", { name: "Aziz" })}</span>
+          <span>{t("fallback")}</span>
+        </>
+      );
+    }
+
+    render(<ZhHantProbe />);
+    expect(await screen.findByText("繁體 Aziz")).toBeInTheDocument();
+    expect(screen.getByText("English fallback")).toBeInTheDocument();
+    expect(screen.queryByText("Simplified fallback")).not.toBeInTheDocument();
+    expect(screen.getByTestId("language")).toHaveTextContent(/^zh-Hant$/);
+  });
+
   it("keeps t identity stable across unrelated re-renders, changing it on language or resource changes", async () => {
     const { initSandboxI18n, installAddonTranslationRuntime, setSandboxLanguage } =
       await loadSandbox();

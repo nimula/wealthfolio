@@ -13,6 +13,8 @@ src/i18n/
     en/<ns>.json # source language (canonical keys)
     fr/<ns>.json
     de/<ns>.json
+    zh/<ns>.json
+    zh-Hant/<ns>.json
 ```
 
 Namespaces (one JSON file each): `common`, `dashboard`, `holdings`, `activity`,
@@ -42,7 +44,10 @@ browser-detected. It is chosen during onboarding and in Settings → General, an
 persisted through the normal settings pipeline (stored per-device, like `theme`
 and `baseCurrency` — device-sync is not enabled for it). The settings provider
 applies it via `i18n.changeLanguage()` on load and on change. Default is `en`;
-missing keys in fr/de fall back to `en`.
+missing keys in every non-English locale fall back to `en`. Traditional Chinese
+aliases such as `zh-TW`, `zh-HK`, and `zh-MO` normalize to the canonical
+`zh-Hant` code, which falls back directly to `en`, never to Simplified Chinese
+`zh`.
 
 ## Maintenance (i18next-cli)
 

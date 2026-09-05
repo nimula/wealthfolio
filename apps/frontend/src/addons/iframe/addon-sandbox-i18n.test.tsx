@@ -55,6 +55,33 @@ describe("addon sandbox i18n", () => {
     expect(i18n.language).toBe("fr");
   });
 
+  it("normalizes zh-TW to zh-Hant without falling through to zh", async () => {
+    const { initSandboxI18n } = await loadSandboxI18n();
+
+    const i18n = initSandboxI18n("zh-TW");
+
+    expect(i18n.language).toBe("zh-Hant");
+    expect(i18n.languages).toContain("en");
+    expect(i18n.languages).not.toContain("zh");
+    expect(i18n.t("ui:sheet.close")).toBe("關閉");
+    expect(document.documentElement.getAttribute("lang")).toBe("zh-Hant");
+
+    i18n.removeResourceBundle("zh-Hant", "ui");
+    expect(i18n.t("ui:sheet.close")).toBe("Close");
+  });
+
+  it("falls back to English for an unsupported initial language and ignores unsupported updates", async () => {
+    const { initSandboxI18n, setSandboxLanguage } = await loadSandboxI18n();
+
+    const i18n = initSandboxI18n("unsupported-language");
+    expect(i18n.language).toBe("en");
+
+    setSandboxLanguage("fr");
+    expect(i18n.language).toBe("fr");
+    setSandboxLanguage("unsupported-language");
+    expect(i18n.language).toBe("fr");
+  });
+
   it("defaults to the default locale when the host sends no language", async () => {
     const { initSandboxI18n } = await loadSandboxI18n();
     const { DEFAULT_LOCALE } = await import("@/i18n/locales");

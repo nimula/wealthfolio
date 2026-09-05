@@ -17,9 +17,11 @@ export interface AddonTranslationBundle {
 }
 
 /**
- * Translations keyed by base language code (`en`, `fr`, `de`, ...).
- * Regional codes (`fr-CA`) are normalized to their base language; keys that
- * are not plain language codes are ignored with a warning.
+ * Translations keyed by a host-supported locale code (`en`, `fr`, `zh-Hant`,
+ * ...). Supported regional locales are preserved; other regional codes (for
+ * example `fr-CA`) are normalized to their base language. Traditional Chinese
+ * aliases such as `zh-TW`, `zh_Hant_TW`, `zh-HK`, and `zh-MO` normalize to
+ * `zh-Hant`.
  * Languages the host does not support are stored but never resolved.
  */
 export type AddonTranslationResources = Record<string, AddonTranslationBundle>;
@@ -33,7 +35,7 @@ export interface AddonTranslationApi {
    * literally, and `$t()` nesting inside translation values is disabled.
    */
   t: (key: string, options?: Record<string, unknown>) => string;
-  /** Current UI language as a base code (`en`, `fr`, ...). Follows the host setting. */
+  /** Current UI locale (`en`, `fr`, `zh-Hant`, ...). Follows the host setting. */
   language: string;
 }
 

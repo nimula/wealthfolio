@@ -72,6 +72,11 @@ export default function enable(ctx: AddonContext) {
       title: "Prévision de dividendes",
       greeting: "Bonjour {{name}}",
     },
+    "zh-Hant": {
+      title: "股利預測",
+      greeting: "{{name}}，你好",
+      holdings_other: "{{count}} 筆持股",
+    },
   });
 
   // ... register routes / sidebar items
@@ -112,6 +117,19 @@ Behavior and rules:
 - Components re-render automatically on language changes and on (late)
   `registerTranslations` calls, but registering in `enable()` before the first
   render avoids a flash of untranslated keys.
+
+### Traditional Chinese (`zh-Hant`)
+
+Register Traditional Chinese with the canonical `zh-Hant` code. Its numeric
+plural form is `_other`, including when the text does not vary by count:
+
+```tsx
+registerTranslations({
+  "zh-Hant": {
+    holdings_other: "{{count}} 筆持股",
+  },
+});
+```
 
 ### Languages beyond the host's set
 

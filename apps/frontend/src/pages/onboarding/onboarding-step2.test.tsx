@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -6,7 +6,12 @@ import { SUPPORTED_LOCALES } from "@/i18n/locales";
 import { OnboardingStep2 } from "./onboarding-step2";
 
 const mocks = vi.hoisted(() => ({
-  settings: { language: "en" } as { language: string },
+  settings: { language: "en" } as {
+    language: string;
+    formattingRegion?: string;
+    baseCurrency?: string;
+    timezone?: string;
+  },
   updateSettings: vi.fn(() => Promise.resolve()),
 }));
 
@@ -17,8 +22,8 @@ vi.mock("@/lib/settings-provider", () => ({
   }),
 }));
 
-function renderStep2(language = "en") {
-  mocks.settings = { language };
+function renderStep2(language = "en", settings: Partial<typeof mocks.settings> = {}) {
+  mocks.settings = { language, ...settings };
   return render(<OnboardingStep2 onNext={vi.fn()} onValidityChange={vi.fn()} />);
 }
 
@@ -70,5 +75,42 @@ describe("OnboardingStep2 language picker", () => {
     // It takes the last popular slot rather than growing the row.
     expect(screen.queryByTestId("language-ko-button")).not.toBeInTheDocument();
     expect(screen.getByTestId("language-en-button")).toBeInTheDocument();
+  });
+
+  it("derives the initial currency from the formatting region", async () => {
+    renderStep2("en", { formattingRegion: "TW" });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("currency-twd-button")).toHaveClass("text-primary"),
+    );
+  });
+
+  it("keeps an existing base currency when the UI language changes", async () => {
+    const user = userEvent.setup();
+    renderStep2("en", { formattingRegion: "TW", baseCurrency: "JPY" });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("currency-jpy-button")).toHaveClass("text-primary"),
+    );
+    await user.click(screen.getByTestId("language-fr-button"));
+
+    expect(screen.getByTestId("currency-jpy-button")).toHaveClass("text-primary");
+  });
+
+  it("updates an untouched currency recommendation with the formatting region", async () => {
+    const user = userEvent.setup();
+    renderStep2("en", { formattingRegion: "US" });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("currency-usd-button")).toHaveClass("text-primary"),
+    );
+    await user.click(
+      within(screen.getByTestId("onboarding-formatting-locale")).getByRole("button", {
+        name: /canada/i,
+      }),
+    );
+
+    expect(screen.getByTestId("currency-cad-button")).toHaveClass("text-primary");
+    expect(mocks.updateSettings).toHaveBeenCalledWith({ formattingRegion: "CA" });
   });
 });

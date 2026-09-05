@@ -1,5 +1,6 @@
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "@/i18n/locales";
 import { useSettingsContext } from "@/lib/settings-provider";
+import { detectDefaultCurrency } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFormatter, Icons, resolveFormattingLocale } from "@wealthfolio/ui";
 import { Card, CardContent } from "@wealthfolio/ui/components/ui/card";
@@ -32,47 +33,10 @@ function createOnboardingSettingsSchema(t: TFunction) {
 
 type OnboardingSettingsSchema = ReturnType<typeof createOnboardingSettingsSchema>;
 
-function detectDefaultCurrency(locale?: string): string | undefined {
-  if (!locale && typeof navigator === "undefined") return undefined;
-  const lang = locale || navigator.language || navigator.languages[0];
-  const localeTag = lang.replaceAll("_", "-").toLowerCase();
-  if (lang.startsWith("en-GB")) return "GBP";
-  if (lang.startsWith("en-US")) return "USD";
-  if (lang.startsWith("en-CA")) return "CAD";
-  if (lang.startsWith("fr-CA")) return "CAD";
-  if (lang.startsWith("en-AU")) return "AUD";
-  if (lang.startsWith("de")) return "EUR";
-  if (lang.startsWith("fr")) return "EUR";
-  if (lang.startsWith("es-MX")) return "MXN";
-  if (lang.startsWith("es")) return "EUR";
-  if (lang.startsWith("it")) return "EUR";
-  if (lang.startsWith("ja")) return "JPY";
-  if (localeTag.startsWith("zh")) {
-    // The region decides the currency, not the script: `zh-Hant-HK` is HKD, not TWD.
-    const parts = localeTag.split("-");
-    if (parts.includes("hk")) return "HKD";
-    if (parts.includes("mo")) return "MOP";
-    if (parts.includes("tw") || parts.includes("hant")) return "TWD";
-    return "CNY";
-  }
-  if (lang.startsWith("ko")) return "KRW";
-  if (lang.startsWith("ru")) return "RUB";
-  if (lang.startsWith("nl")) return "EUR";
-  if (lang.startsWith("pl")) return "EUR";
-  if (lang.startsWith("pt-BR")) return "BRL";
-  if (lang.startsWith("pt")) return "EUR";
-  if (lang.startsWith("sv")) return "EUR";
-  if (lang.startsWith("tr")) return "EUR";
-  if (lang.startsWith("ar")) return "USD";
-  if (lang.startsWith("hi")) return "INR";
-  return undefined;
-}
-
 // Languages shown as chips. Listed explicitly (rather than sliced off
 // SUPPORTED_LOCALES) so adding or reordering a locale cannot silently change
 // what onboarding puts on screen; everything else lives behind "Other".
 const popularLanguages = ["en", "fr", "de", "es", "zh", "ja", "ko"];
-
 const popularCurrencies = ["USD", "CAD", "EUR", "GBP"];
 
 const formattingRegions = [
@@ -306,7 +270,10 @@ export const OnboardingStep2 = forwardRef<OnboardingStep2Handle, OnboardingStep2
 
     useEffect(() => {
       if (!initialValuesSet) {
-        const defaultCurrency = settings?.baseCurrency || detectDefaultCurrency() || "";
+        const defaultCurrency =
+          settings?.baseCurrency ||
+          detectDefaultCurrency(resolveFormattingLocale(formattingRegion)) ||
+          "";
         const defaultTimezone = settings?.timezone || detectBrowserTimezone();
         form.reset(
           { baseCurrency: defaultCurrency, timezone: defaultTimezone },
@@ -316,7 +283,7 @@ export const OnboardingStep2 = forwardRef<OnboardingStep2Handle, OnboardingStep2
         void form.trigger();
         setInitialValuesSet(true);
       }
-    }, [form, settings, initialValuesSet]);
+    }, [form, settings, initialValuesSet, formattingRegion]);
 
     async function onSubmit(data: OnboardingSettingsValues) {
       try {

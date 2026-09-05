@@ -70,8 +70,9 @@ function RegionalFormattedMonth() {
   return <span>{formatting.formatCalendarDate("2026-01-01", { month: "long" })}</span>;
 }
 
-function UILocaleConsumer() {
-  return <span>{useLocalizationSettings().uiLocale}</span>;
+function LocalizationSettingsConsumer() {
+  const { locale, uiLocale } = useLocalizationSettings();
+  return <span>{locale + "|" + uiLocale}</span>;
 }
 
 describe("FormattingProvider", () => {
@@ -106,23 +107,96 @@ describe("FormattingProvider", () => {
     expect(screen.getByText("Januar")).toBeInTheDocument();
   });
 
-  it("keeps the UI locale available separately from the formatting locale", () => {
+  it.each([
+    {
+      formattingLocale: "DE",
+      uiLocale: "zh-Hant",
+      expectedSettings: "de-DE|zh-Hant",
+      expectedNumber: "1.234,56",
+      expectedSegments: ["year", "month", "day"],
+      expectedDescription: /選定的日期：/,
+    },
+    {
+      formattingLocale: "TW",
+      uiLocale: "zh-Hant",
+      expectedSettings: "zh-TW|zh-Hant",
+      expectedNumber: "1,234.56",
+      expectedSegments: ["year", "month", "day"],
+      expectedDescription: /選定的日期：/,
+    },
+    {
+      formattingLocale: "zh-HK",
+      uiLocale: "zh-Hant",
+      expectedSettings: "zh-HK|zh-Hant",
+      expectedNumber: "1,234.56",
+      expectedSegments: ["year", "month", "day"],
+      expectedDescription: /選定的日期：/,
+    },
+    {
+      formattingLocale: "zh-MO",
+      uiLocale: "zh-Hant-HK-u-nu-hanidec",
+      expectedSettings: "zh-MO|zh-Hant-HK-u-nu-hanidec",
+      expectedNumber: "1,234.56",
+      expectedSegments: ["year", "month", "day"],
+      expectedDescription: /選定的日期：/,
+    },
+    {
+      formattingLocale: "TW",
+      uiLocale: "zh",
+      expectedSettings: "zh-TW|zh",
+      expectedNumber: "1,234.56",
+      expectedSegments: ["year", "month", "day"],
+      expectedDescription: /\u9009\u5b9a\u7684\u65e5\u671f\uff1a/,
+    },
+    {
+      formattingLocale: "TW",
+      uiLocale: "en",
+      expectedSettings: "zh-TW|en",
+      expectedNumber: "1,234.56",
+      expectedSegments: ["month", "day", "year"],
+      expectedDescription: /Selected Date:/,
+    },
+  ])(
+    "keeps the $uiLocale UI locale separate from the $formattingLocale formatting region",
+    ({
+      formattingLocale,
+      uiLocale,
+      expectedSettings,
+      expectedNumber,
+      expectedSegments,
+      expectedDescription,
+    }) => {
+      render(
+        <FormattingProvider locale={formattingLocale} uiLocale={uiLocale}>
+          <LocalizationSettingsConsumer />
+          <RegionalNumber />
+          <DatePickerInput value="2026-08-18" onChange={() => undefined} />
+        </FormattingProvider>,
+      );
+
+      expect(screen.getByText(expectedSettings)).toBeInTheDocument();
+      expect(screen.getByText(expectedNumber)).toBeInTheDocument();
+      expect(screen.getByText(expectedDescription)).toBeInTheDocument();
+      expect(screen.getAllByRole("spinbutton").map((segment) => segment.dataset.type)).toEqual(
+        expectedSegments,
+      );
+    },
+  );
+
+  it("keeps app formatting extensions while using React Aria's exact Traditional locale", () => {
     render(
-      <FormattingProvider locale="DE" uiLocale="en">
-        <UILocaleConsumer />
+      <FormattingProvider locale="zh-HK-u-ca-chinese-nu-hanidec" uiLocale="zh-Hant">
+        <LocalizationSettingsConsumer />
         <RegionalNumber />
+        <RegionalFormattedMonth />
         <DatePickerInput value="2026-08-18" onChange={() => undefined} />
       </FormattingProvider>,
     );
 
-    expect(screen.getByText("en")).toBeInTheDocument();
-    expect(screen.getByText("1.234,56")).toBeInTheDocument();
-    expect(screen.getByRole("spinbutton", { name: /month/i })).toBeInTheDocument();
-    expect(screen.getAllByRole("spinbutton").map((segment) => segment.dataset.type)).toEqual([
-      "day",
-      "month",
-      "year",
-    ]);
+    expect(screen.getByText("zh-HK-u-ca-chinese-nu-hanidec|zh-Hant")).toBeInTheDocument();
+    expect(screen.getByText("一,二三四.五六")).toBeInTheDocument();
+    expect(screen.getByText("十一月")).toBeInTheDocument();
+    expect(screen.getByText(/選定的日期：/)).toBeInTheDocument();
   });
 
   it("reuses the provider-owned finance service across consumers", () => {

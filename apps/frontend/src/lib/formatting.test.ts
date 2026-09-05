@@ -50,6 +50,27 @@ describe("locale formatting", () => {
     expect(formatter.formatDecimal(1234.56)).toBe("1.234,56");
   });
 
+  it("matches Intl output for Taiwan formats", () => {
+    const formatter = createFormatter("TW", "UTC");
+    const sample = new Date(Date.UTC(2026, 7, 18, 14, 30));
+
+    expect(formatter.locale).toBe("zh-TW");
+    expect(formatter.formatDate(sample, { dateStyle: "short" })).toBe(
+      new Intl.DateTimeFormat("zh-TW", { dateStyle: "short", timeZone: "UTC" }).format(sample),
+    );
+    expect(formatter.formatDecimal(1234.56)).toBe(new Intl.NumberFormat("zh-TW").format(1234.56));
+    expect(formatter.formatAmount(1234.56, "TWD")).toBe(
+      new Intl.NumberFormat("zh-TW", { style: "currency", currency: "TWD" }).format(1234.56),
+    );
+    expect(formatter.formatPercent(0.125, { digits: 1 })).toBe(
+      new Intl.NumberFormat("zh-TW", {
+        style: "percent",
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      }).format(0.125),
+    );
+  });
+
   it.each(["en", "ja", "ko", "zh"])(
     "keeps German conventions authoritative with a %s UI",
     (uiLocale) => {
@@ -69,6 +90,12 @@ describe("locale formatting", () => {
     expect(dateFnsLocaleFor("zh-HK").options?.weekStartsOn).toBe(0);
     expect(dateFnsLocaleFor("es-MX").localize.month(0)).toBe("enero");
     expect(dateFnsLocaleFor("es-MX").options?.weekStartsOn).toBe(0);
+    const taiwan = dateFnsLocaleFor("zh-TW");
+    expect(taiwan.code).toBe("zh-TW");
+    expect(taiwan.localize.month(0)).toBe("一月");
+    expect(taiwan.options?.weekStartsOn).toBe(0);
+    expect(taiwan.options?.firstWeekContainsDate).toBe(1);
+    expect(dateFnsLocaleFor("zh-Hant-TW").formatDistance("aboutXHours", 2)).toBe("大約 2 小時");
     expect(() => dateFnsLocaleFor(undefined)).toThrow("A resolved formatting locale is required");
   });
 
@@ -84,6 +111,47 @@ describe("locale formatting", () => {
       expect(locale.options?.weekStartsOn).toBe(0);
     },
   );
+
+  it.each([
+    ["zh-TW", "大約 2 小時"],
+    ["zh-CN", "大约 2 小时"],
+  ])("applies CLDR week rules to the exact %s date-fns locale", (locale, distance) => {
+    const weekInfo = vi
+      .spyOn(Intl.Locale.prototype, "weekInfo", "get")
+      .mockReturnValue({ firstDay: 2, weekend: [6, 7], minimalDays: 4 });
+
+    try {
+      const dateFnsLocale = dateFnsLocaleFor(locale);
+      expect(dateFnsLocale.formatDistance("aboutXHours", 2)).toBe(distance);
+      expect(dateFnsLocale.options?.weekStartsOn).toBe(2);
+      expect(dateFnsLocale.options?.firstWeekContainsDate).toBe(4);
+    } finally {
+      weekInfo.mockRestore();
+    }
+  });
+
+  it("keeps Taiwan week defaults without either Intl week-info API", () => {
+    const localePrototype = Intl.Locale.prototype as Intl.Locale & {
+      getWeekInfo?: () => { firstDay: number; minimalDays: number };
+    };
+    const getWeekInfoDescriptor = Object.getOwnPropertyDescriptor(localePrototype, "getWeekInfo");
+    const weekInfoDescriptor = Object.getOwnPropertyDescriptor(localePrototype, "weekInfo");
+
+    Reflect.deleteProperty(localePrototype, "getWeekInfo");
+    Reflect.deleteProperty(localePrototype, "weekInfo");
+    try {
+      const taiwan = dateFnsLocaleFor("zh-TW");
+      expect(taiwan.options?.weekStartsOn).toBe(0);
+      expect(taiwan.options?.firstWeekContainsDate).toBe(1);
+    } finally {
+      if (getWeekInfoDescriptor) {
+        Object.defineProperty(localePrototype, "getWeekInfo", getWeekInfoDescriptor);
+      }
+      if (weekInfoDescriptor) {
+        Object.defineProperty(localePrototype, "weekInfo", weekInfoDescriptor);
+      }
+    }
+  });
 
   it.each(["it-IT", "pt-BR", "nl-NL", "ar-EG", "fa-IR"])(
     "supports the arbitrary system locale %s in date-fns calendars",
@@ -130,6 +198,7 @@ describe("locale formatting", () => {
     ["fr-FR", "CAD"],
     ["ja-JP", "CNY"],
     ["zh-CN", "JPY"],
+    ["TW", "TWD"],
     ["ko-KR", "CNY"],
     ["pl-PL", "PLN"],
     ["sv-SE", "SEK"],
@@ -147,10 +216,13 @@ describe("locale formatting", () => {
     expect(parseLocalizedNumber("١٬٢٣٤٬٥٦٧٫٨٩", "ar-EG")).toBe(1234567.89);
   });
 
-  it.each(["ja-JP", "ko-KR", "zh-CN"])("normalizes full-width numeric input for %s", (locale) => {
-    expect(parseLocalizedNumber("１，２３４．５６", locale)).toBe(1234.56);
-    expect(createFormatter(locale).parseNumber("１，２３４．５６")).toBe(1234.56);
-  });
+  it.each(["ja-JP", "ko-KR", "zh-CN", "zh-TW"])(
+    "normalizes full-width numeric input for %s",
+    (locale) => {
+      expect(parseLocalizedNumber("１，２３４．５６", locale)).toBe(1234.56);
+      expect(createFormatter(locale).parseNumber("１，２３４．５６")).toBe(1234.56);
+    },
+  );
 
   it("rejects malformed mixed separators", () => {
     expect(parseLocalizedNumber("1,234.5.6", "en-US")).toBeUndefined();
@@ -202,6 +274,7 @@ describe("locale formatting", () => {
     expect(parseLocalizedDate("２０２６/８/１８", "ja-JP")?.getFullYear()).toBe(2026);
     expect(parseLocalizedDate("２０２６/８/１８", "ja-JP")?.getMonth()).toBe(7);
     expect(parseLocalizedDate("２０２６/８/１８", "ja-JP")?.getDate()).toBe(18);
+    expect(parseLocalizedDate("２０２６/８/１８", "zh-TW")).toEqual(new Date(2026, 7, 18));
   });
 
   it.each(["ar-EG", "fa-IR", "th-TH"])(
